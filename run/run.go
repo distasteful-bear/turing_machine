@@ -3,6 +3,7 @@ package run
 import (
 	"distasteful-bear/turing_machine/verifiers"
 	"fmt"
+	"slices"
 )
 
 func printVerifiers(vs [4]verifiers.Verifier) {
@@ -10,6 +11,30 @@ func printVerifiers(vs [4]verifiers.Verifier) {
 	for i, v := range vs {
 		fmt.Printf("Verifier #%v\n", (i + 1))
 		fmt.Println(v)
+	}
+}
+func enterGuess() [3]rune {
+	for {
+		fmt.Println("Please enter a three digit number with digits between 1-5:")
+		var guess [3]rune
+		_, err := fmt.Scanln(guess)
+		invalid := false
+		if err != nil {
+			fmt.Println("failed to read input. please try again.")
+		}
+		if len(guess) != 3 {
+			invalid = true
+		}
+		for _, c := range guess {
+			if !slices.Contains([]rune{'1', '2', '3', '4', '5'}, c) {
+				invalid = true
+			}
+		}
+		if invalid {
+			fmt.Println("input was invalid. please try again.")
+		} else {
+			return guess
+		}
 	}
 }
 func RunLocalSinglePlayer(p verifiers.Puzzle) {
@@ -27,7 +52,7 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 		}
 		printVerifiers(p.Vers)
 		guess := enterGuess()
-
+		fmt.Println("Guess: %v", guess)
 	}
 	return
 }

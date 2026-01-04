@@ -8,10 +8,10 @@ import (
 	"strconv"
 )
 
-func generateRandomSolution() solution {
+func generateRandomSolution() verifiers.Solution {
 	idx := rand.Intn(125)
 	digits := strconv.FormatInt(int64(idx), 5)
-	return solution{
+	return verifiers.Solution{
 		Idx:    idx,
 		Digits: []rune(digits),
 	}
