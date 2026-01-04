@@ -18,7 +18,7 @@ func enterGuess() [3]rune {
 	for {
 		fmt.Println("Please enter a three digit number with digits between 1-5:")
 		var guess string
-		_, err := fmt.Scan(guess)
+		_, err := fmt.Scan(&guess)
 		invalid := false
 		if err != nil {
 			fmt.Println("failed to read input. ending process")
@@ -59,14 +59,8 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 		}
 		printVerifiers(p.Vers)
 
-		var i int
-
-		fmt.Print("Type a number: ")
-		fmt.Scan(&i)
-		fmt.Println("Your number is:", i)
-
-		// guess := enterGuess()
-		//fmt.Println("Guess: %v", guess)
+		guess := enterGuess()
+		fmt.Println("Guess: %v", guess)
 	}
 	return
 }
