@@ -14,13 +14,18 @@ func printVerifiers(vs [4]verifiers.Verifier) {
 	}
 }
 func enterGuess() [3]rune {
+	var finalGuess [3]rune
 	for {
 		fmt.Println("Please enter a three digit number with digits between 1-5:")
-		var guess [3]rune
-		_, err := fmt.Scanln(guess)
+		var guess string
+		_, err := fmt.Scan(guess)
 		invalid := false
 		if err != nil {
-			fmt.Println("failed to read input. please try again.")
+			fmt.Println("failed to read input. ending process")
+			break
+		}
+		if len(guess) != 3 {
+			continue
 		}
 		if len(guess) != 3 {
 			invalid = true
@@ -33,9 +38,11 @@ func enterGuess() [3]rune {
 		if invalid {
 			fmt.Println("input was invalid. please try again.")
 		} else {
-			return guess
+			finalGuess = [3]rune{}
 		}
 	}
+	return finalGuess
+
 }
 func RunLocalSinglePlayer(p verifiers.Puzzle) {
 	fmt.Println("Welcome to the Turing Machine Game.\n\n")
@@ -51,8 +58,15 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 			break
 		}
 		printVerifiers(p.Vers)
-		guess := enterGuess()
-		fmt.Println("Guess: %v", guess)
+
+		var i int
+
+		fmt.Print("Type a number: ")
+		fmt.Scan(&i)
+		fmt.Println("Your number is:", i)
+
+		// guess := enterGuess()
+		//fmt.Println("Guess: %v", guess)
 	}
 	return
 }
