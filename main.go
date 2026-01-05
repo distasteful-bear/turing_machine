@@ -13,7 +13,7 @@ func generateRandomSolution() verifiers.Solution {
 	digits := strconv.FormatInt(int64(idx), 5)
 	return verifiers.Solution{
 		Idx:    idx,
-		Digits: []rune(digits),
+		Digits: [3]rune([]rune(digits)),
 	}
 }
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	// numTests := 4
 	// sol := generateRandomSolution()
 
-	puzzle := verifiers.TestingVerifiers(verifiers.Solution{Idx: 0, Digits: []rune{'1', '1', '1'}})
+	puzzle := verifiers.TestingVerifiers(verifiers.Solution{Idx: 0, Digits: [3]rune{'1', '1', '1'}})
 
 	run.RunLocalSinglePlayer(puzzle)
 }

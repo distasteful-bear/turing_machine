@@ -8,7 +8,7 @@ import (
 
 type Solution struct {
 	Idx    int // from 1-125
-	Digits []rune
+	Digits [3]rune
 }
 
 type Puzzle struct {
@@ -27,11 +27,11 @@ type Verifier struct {
 type color string // blue, yellow, purple
 
 func V_NumberOfNInSol(num rune, sol Solution) Verifier {
-	numOfN := strings.Count(string(sol.Digits), string(num))
+	numOfN := strings.Count(string(sol.Digits[:]), string(num))
 	return Verifier{
 		Desc: fmt.Sprintf("The number of %cs in the code", num),
 		VerifierFunc: func(sol Solution) bool {
-			return strings.Count(string(sol.Digits), string(num)) == numOfN
+			return strings.Count(string([]rune(sol.Digits[:])), string(num)) == numOfN
 		}}
 }
 
