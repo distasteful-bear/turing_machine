@@ -1,11 +1,8 @@
 package api
 
 import (
+	"distasteful-bear/turing_machine/utils"
 	"distasteful-bear/turing_machine/verifiers"
-	"errors"
-	"fmt"
-	"slices"
-	"strconv"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -34,34 +31,6 @@ func SetupSessionStoreInMem() gin.HandlerFunc {
 		c.Set("session_store", store)
 		c.Next()
 	}
-}
-
-func SanitizeGuess(guess string) (verifiers.Solution, error) {
-	solution := verifiers.Solution{
-		ResultIdx: 0,
-		Display:   [3]rune{'1', '1', '1'},
-	}
-	if len(guess) > 3 {
-		return solution, errors.New("guess too long")
-	}
-	for _, c := range guess {
-		if !slices.Contains([]rune{'1', '2', '3', '4', '5'}, c) {
-			return solution, errors.New("guess contains non-letter characters")
-		}
-	}
-	if len(guess) != 3 {
-		return solution, errors.New("guess must be exactly 3 characters long")
-	}
-	guessIdx, err := strconv.ParseInt(string(guess[:]), 5, 8)
-	if err != nil {
-		return solution, errors.New("guess contains non-numeric characters")
-	}
-
-	runeSlice := []rune(guess)
-	solution.Display = [3]rune{runeSlice[0], runeSlice[1], runeSlice[2]}
-	solution.ResultIdx = int(guessIdx)
-	fmt.Printf("Guess: %s, Index: %d, Display: %s\n", guess, guessIdx, solution.Display)
-	return solution, nil
 }
 
 func SetupRouter() *gin.Engine {
@@ -104,8 +73,7 @@ func SetupRouter() *gin.Engine {
 			session.Delete("puzzle")
 		}
 		// new session
-		sol := verifiers.GenerateRandomSolution()
-		puzzle = verifiers.GenerateRandomPuzzle(sol)
+		puzzle = verifiers.GenerateRandomPuzzle()
 		session.Set("puzzle", puzzle)
 		session.Save()
 		c.JSON(200, gin.H{"status": "success"})
@@ -121,7 +89,7 @@ func SetupRouter() *gin.Engine {
 			c.JSON(400, gin.H{"error": "no guess"})
 			return
 		}
-		proposedSolution, err := SanitizeGuess(guess)
+		proposedSolution, err := utils.SanitizeGuess(guess)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -164,7 +132,7 @@ func SetupRouter() *gin.Engine {
 			c.JSON(400, gin.H{"error": "no guess"})
 			return
 		}
-		proposedSolution, err := SanitizeGuess(guess)
+		proposedSolution, err := utils.SanitizeGuess(guess)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return

@@ -109,8 +109,14 @@ func intersectionOfSets(rsList []resultSet) resultSet {
 	}
 	return final
 }
-func GenerateRandomPuzzle(sol Solution) Puzzle {
+func getRandomVerifier(vrList []BranchAndResult) (int, BranchAndResult) {
+	randomIndex := rand.Intn(len(vrList))
+	return randomIndex, vrList[randomIndex]
+}
 
+func GenerateRandomPuzzle() Puzzle {
+
+	var sol = GenerateRandomSolution()
 	vList := GetAllVerifiers()
 
 	var allBranches []VerifierBranch
@@ -134,48 +140,40 @@ func GenerateRandomPuzzle(sol Solution) Puzzle {
 	for i := range curSolCard {
 		curSolCard[i] = true
 	}
-	innerLoopCount := 0
 	outerLoopCount := 0
 	for {
 		outerLoopCount += 1
-		for i, vr := range versAndResults {
-			if slices.Contains(indexesOfPickedBranches, i) {
-				continue
+		i, vr := getRandomVerifier(versAndResults)
+		if slices.Contains(indexesOfPickedBranches, i) {
+			continue
+		}
+
+		solutionCardIfPicked := intersectionOfSets([]resultSet{vr.Result, curSolCard})
+		before := countTrue(curSolCard)
+		after := countTrue(solutionCardIfPicked)
+
+		if len(pickedBranches) < 3 {
+			if before > after && after != 1 {
+				indexesOfPickedBranches = append(indexesOfPickedBranches, i)
+				pickedBranches = append(pickedBranches, vr.Branch)
+				curSolCard = solutionCardIfPicked
 			}
-			innerLoopCount += 1
-
-			solutionCardIfPicked := intersectionOfSets([]resultSet{vr.Result, curSolCard})
-			before := countTrue(curSolCard)
-			after := countTrue(solutionCardIfPicked)
-
-			if len(pickedBranches) < 3 {
-				if before > after && after != 1 {
-					indexesOfPickedBranches = append(indexesOfPickedBranches, i)
-					pickedBranches = append(pickedBranches, vr.Branch)
-					curSolCard = solutionCardIfPicked
-				}
-			} else {
-				if after == 1 {
-					indexesOfPickedBranches = append(indexesOfPickedBranches, i)
-					pickedBranches = append(pickedBranches, vr.Branch)
-					curSolCard = solutionCardIfPicked
-					break
-				}
+		} else {
+			if after == 1 {
+				indexesOfPickedBranches = append(indexesOfPickedBranches, i)
+				pickedBranches = append(pickedBranches, vr.Branch)
+				curSolCard = solutionCardIfPicked
+				break
 			}
 		}
 		if len(pickedBranches) == 4 {
 			break
 		}
-		if outerLoopCount%1000 == 0 {
-			indexesOfPickedBranches = []int{}
-			pickedBranches = []VerifierBranch{}
-			for i := range curSolCard {
-				curSolCard[i] = true
-			}
+		if outerLoopCount%10000 == 0 {
+			return GenerateRandomPuzzle()
 		}
-		if outerLoopCount%1000 == 0 {
+		if outerLoopCount%10000 == 0 {
 			fmt.Printf("Outer loop count: %v\n", outerLoopCount)
-			fmt.Printf("Inner loop count: %v\n", innerLoopCount)
 		}
 	}
 	return Puzzle{
