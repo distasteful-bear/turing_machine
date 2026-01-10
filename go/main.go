@@ -14,17 +14,13 @@ func main() {
 	fmt.Println("Setting up Game...")
 	args := os.Args[1:]
 
-	if len(args) == 0 {
-		fmt.Println("No arguments provided")
-		return
-	}
 	var sol verifiers.Solution
 	if slices.Contains(args, "--known") {
 		sol = verifiers.Solution{ResultIdx: 0, Display: [3]rune{'1', '1', '1'}}
 	} else {
 		sol = verifiers.GenerateRandomSolution()
 	}
-	if args[0] == "--local" {
+	if slices.Contains(args, "--local") {
 		// cli game
 		puzzle := verifiers.GenerateRandomPuzzle(sol)
 		run.RunLocalSinglePlayer(puzzle)
