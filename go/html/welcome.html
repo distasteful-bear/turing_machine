@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <script
+            src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
+            integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
+            crossorigin="anonymous"
+        ></script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Turing Machine - Logic Puzzle Game</title>
@@ -396,23 +401,9 @@
                 guesses (like 1-1-1 or 5-5-5) to gather maximum information
                 about the constraints!
             </div>
-
-            <button class="start-button" onclick="startGame()">
-                Start New Game
-            </button>
+            <a href="/guess">
+                <button class="start-button">Start New Game</button>
+            </a>
         </div>
-
-        <script>
-            function startGame() {
-                // TODO: Initialize game state and navigate to guess.html
-                // For now, just show an alert
-                alert(
-                    "Game starting! Navigate to the guess page to begin playing.\n\nIn a full implementation, this would:\n1. Call /api/puzzle/new to generate a puzzle\n2. Store the puzzle ID in session\n3. Redirect to guess.html",
-                );
-
-                // Uncomment when backend is ready:
-                // window.location.href = 'guess.html';
-            }
-        </script>
     </body>
 </html>

@@ -68,15 +68,29 @@ func SetupRouter() *gin.Engine {
 	// puzzle data management
 	router.GET("/setup_session", func(c *gin.Context) {
 		session := sessions.Default(c)
-		puzzle := session.Get("puzzle")
-		if puzzle != nil {
+		cache := session.Get("puzzle")
+		if cache != nil {
 			session.Delete("puzzle")
 		}
 		// new session
-		puzzle = verifiers.GenerateRandomPuzzle()
+		puzzle := verifiers.GenerateRandomPuzzle()
 		session.Set("puzzle", puzzle)
 		session.Save()
-		c.JSON(200, gin.H{"status": "success"})
+
+		type verSummary struct {
+			ID          int    `json:"id"`
+			Description string `json:"description"`
+			Result      string `json:"result"`
+		}
+		puzzleSummary := []verSummary{}
+		for i, v := range puzzle.Vers {
+			puzzleSummary = append(puzzleSummary, verSummary{
+				id:          i,
+				Description: v.Desc,
+				Result:      "",
+			})
+		}
+		c.JSON(200, gin.H{"status": "success", "puzzle_desc": puzzleDesc})
 	})
 
 	router.GET("/check_guess", func(c *gin.Context) {
