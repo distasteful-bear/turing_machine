@@ -7,65 +7,64 @@ import (
 )
 
 type Solution struct {
-	Idx    int // from 1-125
-	Digits [3]rune
+	ResultIdx int     // from 0-124
+	Display   [3]rune // 1-5
 }
 
 type Puzzle struct {
 	Sol  Solution
-	Vers [4]Verifier
+	Vers [4]VerifierBranch
 }
 
 type ResponseSet [125]bool
-type Verifier struct {
+
+type VerifierBranch struct {
 	VerifierFunc func(sol Solution) bool
 	Desc         string
 }
-
-// type VerifierBranch func() ResponseSet
+type Verifier func(color, rune, Solution) VerifierBranch
 
 type color string // blue, yellow, purple
+type digit rune   // 1,2,3,4, or 5
 
-func V_NumberOfNInSol(num rune, sol Solution) Verifier {
-	numOfN := strings.Count(string(sol.Digits[:]), string(num))
-	return Verifier{
+func V_NumberOfNInSol(col color, num rune, sol Solution) VerifierBranch {
+	// intentionally do nothing with color
+	numOfN := strings.Count(string(sol.Display[:]), string(num))
+	return VerifierBranch{
 		Desc: fmt.Sprintf("The number of %cs in the code", num),
 		VerifierFunc: func(sol Solution) bool {
-			return strings.Count(string([]rune(sol.Digits[:])), string(num)) == numOfN
+			return strings.Count(string([]rune(sol.Display[:])), string(num)) == numOfN
 		}}
 }
 
-func V_ColorCompareToNumber(col color, num rune, sol Solution) Verifier {
+func V_ColorCompareToNumber(col color, num rune, sol Solution) VerifierBranch {
 	var idxOfColor = 0
 	switch col {
 	case "blue":
 		idxOfColor = 0
-		break
 	case "yellow":
 		idxOfColor = 1
-		break
 	case "purple":
 		idxOfColor = 2
-		break
 	default:
 		panic("invalid color supplied to VerColorCompareToNumber")
 	}
 
-	v := Verifier{
+	v := VerifierBranch{
 		Desc: fmt.Sprintf("the %v number compared to %c", col, num),
 	}
 
-	if sol.Digits[idxOfColor] == num {
+	if sol.Display[idxOfColor] == num {
 		v.VerifierFunc = func(sol Solution) bool {
-			return sol.Digits[idxOfColor] == num
+			return sol.Display[idxOfColor] == num
 		}
-	} else if sol.Digits[idxOfColor] > num {
+	} else if sol.Display[idxOfColor] > num {
 		v.VerifierFunc = func(sol Solution) bool {
-			return sol.Digits[idxOfColor] > num
+			return sol.Display[idxOfColor] > num
 		}
-	} else if sol.Digits[idxOfColor] < num {
+	} else if sol.Display[idxOfColor] < num {
 		v.VerifierFunc = func(sol Solution) bool {
-			return sol.Digits[idxOfColor] < num
+			return sol.Display[idxOfColor] < num
 		}
 	} else {
 		panic("no equality evaluated to true in V_ColorCompareToNumber")
@@ -75,7 +74,7 @@ func V_ColorCompareToNumber(col color, num rune, sol Solution) Verifier {
 
 func isTotalOdd(sol Solution) bool {
 	total := 0
-	for _, c := range sol.Digits {
+	for _, c := range sol.Display {
 		v, err := strconv.Atoi(string(c))
 		if err != nil {
 			panic(fmt.Sprintf("Could not parse Int from Solution: %v", sol))
@@ -84,10 +83,9 @@ func isTotalOdd(sol Solution) bool {
 	}
 	return (total % 2) != 0
 }
-
-func V_SumOfAllNumbersOddEven(sol Solution) Verifier {
+func V_SumOfAllNumbersOddEven(col color, num rune, sol Solution) VerifierBranch {
 	isOdd := isTotalOdd(sol)
-	return Verifier{
+	return VerifierBranch{
 		Desc: "if the sum of all the numbers is even or odd",
 		VerifierFunc: func(sol Solution) bool {
 			return isOdd == isTotalOdd(sol)
@@ -98,7 +96,7 @@ func V_SumOfAllNumbersOddEven(sol Solution) Verifier {
 func countRepitions(sol Solution) int {
 	maxRepititions := 0
 	curRepitions := 0
-	for i, c := range sol.Digits {
+	for i, c := range sol.Display {
 		nextChar := i + 1
 		nextnextChar := i + 2
 		if nextChar > 2 {
@@ -107,10 +105,10 @@ func countRepitions(sol Solution) int {
 		if nextnextChar > 2 {
 			nextnextChar -= 3
 		}
-		if sol.Digits[nextChar] == c {
+		if sol.Display[nextChar] == c {
 			curRepitions += 1
 		}
-		if sol.Digits[nextnextChar] == c {
+		if sol.Display[nextnextChar] == c {
 			curRepitions += 1
 		}
 		if curRepitions > maxRepititions {
@@ -120,29 +118,23 @@ func countRepitions(sol Solution) int {
 	}
 	return maxRepititions
 }
-func V_NumberRepeatsItself(sol Solution) Verifier {
+func V_NumberRepeatsItself(col color, num rune, sol Solution) VerifierBranch {
 	numRepetitions := countRepitions(sol)
 
-	return Verifier{
+	return VerifierBranch{
 		Desc: "how many times a number repeats itself in the code",
 		VerifierFunc: func(sol Solution) bool {
 			return numRepetitions == countRepitions(sol)
 		},
 	}
-
 }
 
-func TestingVerifiers(sol Solution) Puzzle {
-
-	testVers := [4]Verifier{
-		V_ColorCompareToNumber("yellow", '4', sol),
-		V_NumberOfNInSol('3', sol),
-		V_SumOfAllNumbersOddEven(sol),
-		V_NumberRepeatsItself(sol),
+func GetAllVerifiers() []Verifier {
+	AllVerifiers := []Verifier{
+		V_NumberOfNInSol,
+		V_ColorCompareToNumber,
+		V_SumOfAllNumbersOddEven,
+		V_NumberRepeatsItself,
 	}
-
-	return Puzzle{
-		Sol:  sol,
-		Vers: testVers,
-	}
+	return AllVerifiers
 }

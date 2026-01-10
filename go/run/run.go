@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func printVerifiers(displayOnly bool, vs [4]verifiers.Verifier, guess verifiers.Solution) {
+func printVerifiers(displayOnly bool, vs [4]verifiers.VerifierBranch, guess verifiers.Solution) {
 	for i, v := range vs {
 		fmt.Printf("Verifier %v: ", (i + 1))
 		fmt.Println(v.Desc)
@@ -20,39 +20,40 @@ func printVerifiers(displayOnly bool, vs [4]verifiers.Verifier, guess verifiers.
 	}
 }
 func enterGuess() [3]rune {
-	var finalGuess [3]rune
+	// returns within loop, continue whenever an issue occurs
 	for {
 		fmt.Println("Please enter a three digit number with digits between 1-5:")
+		// get int from scan
 		var guess int
 		_, err := fmt.Scan(&guess)
-		invalid := false
 		if err != nil {
-			fmt.Println("failed to read input. ending process")
-			break
-		}
-		guess = guess - 111
-		strguess := strconv.Itoa(guess)
-		if len(strguess) != 3 {
+			fmt.Println("failed to read input, scaning to int failed. try again.")
 			continue
 		}
+		// only three chars
+		strguess := strconv.Itoa(guess)
 		if len(strguess) != 3 {
-			invalid = true
+			fmt.Println("failed to read input, input longer than 3. try again.")
+			continue
 		}
+		// only (1...5) chars
 		for _, c := range strguess {
 			if !slices.Contains([]rune{'1', '2', '3', '4', '5'}, c) {
-				invalid = true
+				fmt.Printf("input was invalid. please try again. %c was not in (1-5)\n", c)
+				continue
 			}
 		}
-		if invalid {
-			fmt.Println("input was invalid. please try again.")
-		} else {
-			copy(finalGuess[:], []rune(strguess)[:])
-			break
+		result := [3]rune{'1', '1', '1'}
+		for i, v := range strguess {
+			if i > 2 {
+				continue
+			}
+			result[i] = v
 		}
+		return result
 	}
-	return finalGuess
-
 }
+
 func RunLocalSinglePlayer(p verifiers.Puzzle) {
 	utils.CallClear()
 	fmt.Println("Welcome to the Turing Machine Game.\n\n")
@@ -69,8 +70,8 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 		panic("could not parse int")
 	}
 	sol := verifiers.Solution{
-		Digits: [3]rune{'4', '2', '1'},
-		Idx:    int(intSolIdx),
+		Display:   [3]rune{'4', '2', '1'},
+		ResultIdx: int(intSolIdx),
 	}
 	for {
 		if checkAnswer {
@@ -89,8 +90,8 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 			continue
 		}
 		sol = verifiers.Solution{
-			Digits: guess,
-			Idx:    int(guessIdx),
+			Display:   guess,
+			ResultIdx: int(guessIdx),
 		}
 		// display results
 		fmt.Printf("Guess: %c\n", guess)
@@ -120,7 +121,7 @@ func RunLocalSinglePlayer(p verifiers.Puzzle) {
 	guess := enterGuess()
 	utils.CallClear()
 
-	if guess == p.Sol.Digits {
+	if guess == p.Sol.Display {
 		fmt.Println("Success! You have solved the puzzle.")
 	} else {
 		fmt.Println("Failure! You have not solved the puzzle.")
