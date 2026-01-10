@@ -15,7 +15,7 @@ func printSolution(sol verifiers.Solution) {
 
 }
 
-func main() {
+func test() {
 
 	println("Test 1: random Solution Generation")
 	println("==================================")

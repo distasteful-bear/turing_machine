@@ -1,6 +1,7 @@
 package main
 
 import (
+	"distasteful-bear/turing_machine/api"
 	"distasteful-bear/turing_machine/run"
 	"distasteful-bear/turing_machine/verifiers"
 	"fmt"
@@ -19,4 +20,9 @@ func main() {
 	// puzzle := verifiers.TestingVerifiers(verifiers.Solution{Idx: 0, Digits: [3]rune{'1', '1', '1'}})
 
 	run.RunLocalSinglePlayer(puzzle)
+
+	router := api.SetupRouter()
+	// Start the server
+	router.Run(":8080")
+
 }
