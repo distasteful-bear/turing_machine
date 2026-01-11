@@ -78,19 +78,19 @@ func SetupRouter() *gin.Engine {
 		session.Save()
 
 		type verSummary struct {
-			ID          int    `json:"id"`
+			Id          int    `json:"id"`
 			Description string `json:"description"`
 			Result      string `json:"result"`
 		}
 		puzzleSummary := []verSummary{}
 		for i, v := range puzzle.Vers {
 			puzzleSummary = append(puzzleSummary, verSummary{
-				id:          i,
+				Id:          i,
 				Description: v.Desc,
 				Result:      "",
 			})
 		}
-		c.JSON(200, gin.H{"status": "success", "puzzle_desc": puzzleDesc})
+		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
 
 	router.GET("/check_guess", func(c *gin.Context) {
@@ -108,33 +108,38 @@ func SetupRouter() *gin.Engine {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-
 		if cache == nil {
 			c.JSON(400, gin.H{"error": "no puzzle cached"})
 			return
 		}
-
 		puzzle, ok := cache.(verifiers.Puzzle)
 		if !ok {
 			c.JSON(400, gin.H{"error": "invalid cached puzzle"})
 			return
 		}
-
-		results := map[string]string{}
-		for _, verifier := range puzzle.Vers {
-			if verifier.VerifierFunc(proposedSolution) {
-				results[verifier.Desc] = "true"
+		type verSummary struct {
+			Id          int    `json:"id"`
+			Description string `json:"description"`
+			Result      string `json:"result"`
+		}
+		puzzleSummary := []verSummary{}
+		for i, v := range puzzle.Vers {
+			passTest := v.VerifierFunc(proposedSolution)
+			if passTest {
+				puzzleSummary = append(puzzleSummary, verSummary{
+					Id:          i,
+					Description: v.Desc,
+					Result:      "true",
+				})
 			} else {
-				results[verifier.Desc] = "true"
+				puzzleSummary = append(puzzleSummary, verSummary{
+					Id:          i,
+					Description: v.Desc,
+					Result:      "false",
+				})
 			}
 		}
-
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		} else {
-			c.JSON(200, gin.H{"status": results})
-		}
+		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
 	router.GET("/check_final", func(c *gin.Context) {
 
