@@ -1,11 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <script
-            src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
-            integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
-            crossorigin="anonymous"
-        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Final Answer - Turing Machine</title>
@@ -355,10 +351,6 @@
                         <div class="stat-value" id="guessCount">0</div>
                         <div class="stat-label">Guesses Made</div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="possibilities">?</div>
-                        <div class="stat-label">Narrowed To</div>
-                    </div>
                 </div>
             </div>
 
@@ -497,10 +489,11 @@
                 // TODO: Load actual game statistics
                 // GET /api/puzzle/stats
 
-                // Mock data for now
-                const guessCount = Math.floor(Math.random() * 8) + 3;
-                document.getElementById("guessCount").textContent = guessCount;
-                document.getElementById("possibilities").textContent = "1-3";
+                guessCount = sessionStorage.getItem("guessCount");
+                if (guessCount !== null) {
+                    document.getElementById("guessCount").textContent =
+                        guessCount;
+                }
             }
 
             function updateSubmitButton() {
@@ -541,20 +534,21 @@
                 document.getElementById("loading").classList.add("show");
                 document.getElementById("submitBtn").disabled = true;
 
-                // TODO: Submit to backend
-                // POST /api/solve with { answer: answer }
-                // Response should indicate success or failure
-
-                // Mock response for now
-                setTimeout(() => {
-                    const isCorrect = Math.random() > 0.3; // 70% success rate for demo
-
-                    if (isCorrect) {
-                        window.location.href = "success.html?answer=" + answer;
-                    } else {
-                        window.location.href = "failure.html?answer=" + answer;
-                    }
-                }, 1500);
+                axios
+                    .get(`/check_final?guess=${answer}`)
+                    .then((response) => {
+                        const results = response.data;
+                        const successful = results.status === "success";
+                        if (successful) {
+                            window.location.href = "success?answer=" + answer;
+                        } else {
+                            window.location.href = "failure?answer=" + answer;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        showError("Failed to send guess");
+                    });
             }
 
             function showError(message) {
@@ -569,7 +563,7 @@
 
             function goBack() {
                 if (confirm("Go back to continue guessing?")) {
-                    window.location.href = "guess.html";
+                    window.location.href = "guess";
                 }
             }
         </script>

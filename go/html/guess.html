@@ -604,6 +604,10 @@
             function updateStats() {
                 document.getElementById("guessCount").textContent =
                     guessHistory.length;
+                sessionStorage.setItem(
+                    "guessCount",
+                    String(guessHistory.length),
+                );
                 // TODO: Calculate actual remaining possibilities based on constraints
             }
 
@@ -631,7 +635,7 @@
                     );
                     return;
                 }
-                window.location.href = "final.html";
+                window.location.href = "final";
             }
 
             function resetGame() {
@@ -640,7 +644,7 @@
                         "Are you sure you want to start over? This will reset the puzzle.",
                     )
                 ) {
-                    window.location.href = "welcome.html";
+                    window.location.href = "welcome";
                 }
             }
         </script>

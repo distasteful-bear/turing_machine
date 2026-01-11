@@ -401,9 +401,14 @@
                 guesses (like 1-1-1 or 5-5-5) to gather maximum information
                 about the constraints!
             </div>
-            <a href="/guess">
-                <button class="start-button">Start New Game</button>
-            </a>
+            <script>
+                function goToGuessPage() {
+                    window.location.href = "guess";
+                }
+            </script>
+            <button class="start-button" onclick="goToGuessPage()">
+                Start New Game
+            </button>
         </div>
     </body>
 </html>
