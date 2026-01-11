@@ -3,6 +3,7 @@ package api
 import (
 	"distasteful-bear/turing_machine/utils"
 	"distasteful-bear/turing_machine/verifiers"
+	"fmt"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -39,6 +40,9 @@ func SetupRouter() *gin.Engine {
 	store := cookie.NewStore([]byte("03g3iq2n4fp2wo23n1pnic9f0422fjuP"))
 	router.Use(sessions.Sessions("globalsession", store))
 
+	// Setup server-side session store for puzzles
+	router.Use(SetupSessionStoreInMem())
+
 	// Load HTML templates from the html directory
 	router.LoadHTMLGlob("html/*.html")
 
@@ -68,13 +72,26 @@ func SetupRouter() *gin.Engine {
 	// puzzle data management
 	router.GET("/setup_session", func(c *gin.Context) {
 		session := sessions.Default(c)
-		cache := session.Get("puzzle")
-		if cache != nil {
-			session.Delete("puzzle")
-		}
-		// new session
+
+		// Generate a new puzzle
 		puzzle := verifiers.GenerateRandomPuzzle()
-		session.Set("puzzle", puzzle)
+
+		// Get or create session store
+		storeInterface, exists := c.Get("session_store")
+		if !exists {
+			c.JSON(500, gin.H{"error": "session store not initialized"})
+			return
+		}
+		store := storeInterface.(*SessionStore)
+
+		// Generate a unique puzzle ID for this session
+		sessionID := session.ID()
+
+		// Store puzzle in server-side memory
+		store.ActivePuzzles[sessionID] = puzzle
+
+		// Store only the session ID in the session cookie
+		session.Set("puzzle_id", sessionID)
 		session.Save()
 
 		type verSummary struct {
@@ -90,13 +107,36 @@ func SetupRouter() *gin.Engine {
 				Result:      "",
 			})
 		}
+
+		fmt.Println("Puzzle stored with ID:", sessionID) // Testing
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
 
 	router.GET("/check_guess", func(c *gin.Context) {
 
 		session := sessions.Default(c)
-		cache := session.Get("puzzle")
+
+		// Retrieve puzzle ID from session
+		puzzleID := session.Get("puzzle_id")
+		if puzzleID == nil {
+			c.JSON(400, gin.H{"error": "no puzzle session found"})
+			return
+		}
+
+		// Get session store
+		storeInterface, exists := c.Get("session_store")
+		if !exists {
+			c.JSON(500, gin.H{"error": "session store not initialized"})
+			return
+		}
+		store := storeInterface.(*SessionStore)
+
+		// Retrieve puzzle from server-side storage
+		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
+		if !ok {
+			c.JSON(400, gin.H{"error": "puzzle not found in store"})
+			return
+		}
 
 		guess := c.Query("guess")
 		if guess == "" {
@@ -105,16 +145,7 @@ func SetupRouter() *gin.Engine {
 		}
 		proposedSolution, err := utils.SanitizeGuess(guess)
 		if err != nil {
-			c.JSON(400, gin.H{"error": err.Error()})
-			return
-		}
-		if cache == nil {
-			c.JSON(400, gin.H{"error": "no puzzle cached"})
-			return
-		}
-		puzzle, ok := cache.(verifiers.Puzzle)
-		if !ok {
-			c.JSON(400, gin.H{"error": "invalid cached puzzle"})
+			c.JSON(400, gin.H{"error": "error parsing guess"})
 			return
 		}
 		type verSummary struct {
@@ -144,7 +175,28 @@ func SetupRouter() *gin.Engine {
 	router.GET("/check_final", func(c *gin.Context) {
 
 		session := sessions.Default(c)
-		cache := session.Get("puzzle")
+
+		// Retrieve puzzle ID from session
+		puzzleID := session.Get("puzzle_id")
+		if puzzleID == nil {
+			c.JSON(400, gin.H{"error": "no puzzle session found"})
+			return
+		}
+
+		// Get session store
+		storeInterface, exists := c.Get("session_store")
+		if !exists {
+			c.JSON(500, gin.H{"error": "session store not initialized"})
+			return
+		}
+		store := storeInterface.(*SessionStore)
+
+		// Retrieve puzzle from server-side storage
+		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
+		if !ok {
+			c.JSON(400, gin.H{"error": "puzzle not found in store"})
+			return
+		}
 
 		guess := c.Query("guess")
 		if guess == "" {
@@ -154,17 +206,6 @@ func SetupRouter() *gin.Engine {
 		proposedSolution, err := utils.SanitizeGuess(guess)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
-			return
-		}
-
-		if cache == nil {
-			c.JSON(400, gin.H{"error": "no puzzle cached"})
-			return
-		}
-
-		puzzle, ok := cache.(verifiers.Puzzle)
-		if !ok {
-			c.JSON(400, gin.H{"error": "invalid cached puzzle"})
 			return
 		}
 

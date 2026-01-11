@@ -1,11 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <script
-            src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
-            integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
-            crossorigin="anonymous"
-        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Make a Guess - Turing Machine</title>
@@ -450,11 +446,10 @@
                 </div>
             </div>
         </div>
-
         <script>
             // Game state
             let guessHistory = [];
-            let verifiers = [];
+            var verifiers = [];
             let currentPuzzleId = null;
 
             // Initialize the page
@@ -498,51 +493,52 @@
                     });
                 });
             }
-
             function loadPuzzle() {
                 axios
                     .get("/setup_session")
                     .then((response) => {
                         const puzzle = response.data;
-                        verifiers = puzzle.puzzle_desc.map((v) => ({
-                            id: v.Id,
-                            description: v.Desc,
-                            result: null,
+                        console.log(puzzle["puzzle_summary"]);
+                        verifiers = puzzle["puzzle_summary"].map((r) => ({
+                            id: r.id,
+                            description: r.description,
+                            result: r.result,
                         }));
+                        renderVerifiers(verifiers);
                     })
                     .catch((error) => {
                         console.error("Error fetching puzzle:", error);
+                        renderVerifiers([]);
                     });
-
-                renderVerifiers();
             }
 
-            function renderVerifiers() {
+            function renderVerifiers(verifiers) {
                 const verifierList = document.getElementById("verifierList");
+                console.log(verifiers);
                 verifierList.innerHTML = verifiers
                     .map(
                         (v) => `
-                <div class="verifier-item">
-                    <div class="verifier-number">${v.id}</div>
-                    <div class="verifier-desc">${v.description}</div>
-                    <span class="verifier-result ${getResultClass(v.result)}" id="result-${v.id}">
-                        ${getResultText(v.result)}
-                    </span>
-                </div>
-            `,
+                          <div class="verifier-item">
+                              <div class="verifier-number">${String(v["id"] + 1)}</div>
+                              <div class="verifier-desc">${v.description}</div>
+                              <span class="verifier-result ${getResultClass(v.result)}" id="result-${v.id}">
+                                  ${getResultText(v.result)}
+                              </span>
+                          </div>
+                      `,
                     )
                     .join("");
             }
 
             function getResultClass(result) {
-                if (result === true) return "result-true";
-                if (result === false) return "result-false";
+                if (result === "true") return "result-true";
+                if (result === "false") return "result-false";
                 return "result-pending";
             }
 
             function getResultText(result) {
-                if (result === true) return "TRUE";
-                if (result === false) return "FALSE";
+                if (result === "true") return "true";
+                if (result === "false") return "false";
                 return "—";
             }
 
@@ -569,41 +565,17 @@
                 // POST /api/guess with { guess: guess }
                 // Response should include verifier results
                 axios
-                    .get("/check_guess?guess=${guess}")
+                    .get(`/check_guess?guess=${guess}`)
                     .then((response) => {
-                        const results = response.data;
-                        console.log(results);
-                        updateVerifierResults(results);
+                        const results = response.data.puzzle_summary;
+                        renderVerifiers(results);
                         addToHistory(guess, results);
-                        clearInputs();
                         updateStats();
                     })
                     .catch((error) => {
                         console.error(error);
                         showError("Failed to send guess");
                     });
-
-                // Mock response for now
-                const results = {
-                    verifierA: Math.random() > 0.5,
-                    verifierB: Math.random() > 0.5,
-                    verifierC: Math.random() > 0.5,
-                    verifierD: Math.random() > 0.5,
-                };
-
-                updateVerifierResults(results);
-                addToHistory(guess, results);
-                clearInputs();
-                updateStats();
-            }
-
-            function updateVerifierResults(results) {
-                verifiers[0].result = results.verifierA;
-                verifiers[1].result = results.verifierB;
-                verifiers[2].result = results.verifierC;
-                verifiers[3].result = results.verifierD;
-
-                renderVerifiers();
             }
 
             function addToHistory(guess, results) {
@@ -619,10 +591,10 @@
                 historyItem.innerHTML = `
                 <div class="history-guess">${guess.split("").join(" - ")}</div>
                 <div class="history-results">
-                    <span class="verifier-result ${results.verifierA ? "result-true" : "result-false"}">A</span>
-                    <span class="verifier-result ${results.verifierB ? "result-true" : "result-false"}">B</span>
-                    <span class="verifier-result ${results.verifierC ? "result-true" : "result-false"}">C</span>
-                    <span class="verifier-result ${results.verifierD ? "result-true" : "result-false"}">D</span>
+                    <span class="verifier-result ${results[0].result == "true" ? "result-true" : "result-false"}">A</span>
+                    <span class="verifier-result ${results[1].result == "true" ? "result-true" : "result-false"}">B</span>
+                    <span class="verifier-result ${results[2].result == "true" ? "result-true" : "result-false"}">C</span>
+                    <span class="verifier-result ${results[3].result == "true" ? "result-true" : "result-false"}">D</span>
                 </div>
             `;
 

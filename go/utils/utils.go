@@ -50,6 +50,6 @@ func SanitizeGuess(guess string) (verifiers.Solution, error) {
 	runeSlice := []rune(guess)
 	solution.Display = [3]rune{runeSlice[0], runeSlice[1], runeSlice[2]}
 	solution.ResultIdx = int(guessIdx)
-	fmt.Printf("Guess: %s, Index: %d, Display: %v\n", guess, guessIdx, solution.Display)
+	fmt.Printf("Guess: %s, Index: %d, Display: %c%c%c\n", guess, guessIdx, solution.Display[0], solution.Display[1], solution.Display[2])
 	return solution, nil
 }
