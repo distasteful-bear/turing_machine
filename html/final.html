@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Final Answer - Turing Machine</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 700px;
+                width: 100%;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 40px;
+                animation: fadeIn 0.6s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            h1 {
+                color: #333;
+                text-align: center;
+                margin-bottom: 15px;
+                font-size: 2.2em;
+            }
+
+            .subtitle {
+                text-align: center;
+                color: #666;
+                margin-bottom: 30px;
+                font-size: 1.1em;
+            }
+
+            .warning-box {
+                background: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            .warning-box h2 {
+                color: #f57c00;
+                margin-bottom: 10px;
+                font-size: 1.3em;
+            }
+
+            .warning-box p {
+                color: #666;
+                line-height: 1.6;
+            }
+
+            .stats-summary {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 30px;
+            }
+
+            .stats-summary h3 {
+                color: #667eea;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .stat-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+
+            .stat-box {
+                text-align: center;
+                padding: 15px;
+                background: white;
+                border-radius: 8px;
+            }
+
+            .stat-value {
+                font-size: 2em;
+                font-weight: bold;
+                color: #667eea;
+            }
+
+            .stat-label {
+                font-size: 0.9em;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            .guess-section {
+                margin: 30px 0;
+            }
+
+            .guess-section h2 {
+                color: #333;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .input-area {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .digit-input-wrapper {
+                text-align: center;
+            }
+
+            .digit-label {
+                font-size: 0.9em;
+                color: #666;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            .color-blue {
+                color: #2196f3;
+            }
+
+            .color-yellow {
+                color: #ffc107;
+            }
+
+            .color-purple {
+                color: #9c27b0;
+            }
+
+            .digit-input {
+                width: 100px;
+                height: 100px;
+                font-size: 3em;
+                text-align: center;
+                border: 4px solid #ddd;
+                border-radius: 15px;
+                font-weight: bold;
+                transition:
+                    border-color 0.3s,
+                    transform 0.2s,
+                    box-shadow 0.3s;
+                background: white;
+            }
+
+            .digit-input:focus {
+                outline: none;
+                transform: scale(1.08);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            }
+
+            .digit-input.blue-border {
+                border-color: #2196f3;
+            }
+
+            .digit-input.yellow-border {
+                border-color: #ffc107;
+            }
+
+            .digit-input.purple-border {
+                border-color: #9c27b0;
+            }
+
+            .digit-input:invalid {
+                border-color: #f44336;
+            }
+
+            .button-group {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 15px 35px;
+                font-size: 1.1em;
+                font-weight: bold;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn:active:not(:disabled) {
+                transform: translateY(0);
+            }
+
+            .btn-submit {
+                background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+                color: white;
+                font-size: 1.3em;
+                padding: 18px 45px;
+            }
+
+            .btn-back {
+                background: #757575;
+                color: white;
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .error-message {
+                background: #ffebee;
+                border-left: 4px solid #f44336;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+                color: #c62828;
+                display: none;
+                animation: shake 0.5s;
+            }
+
+            .error-message.show {
+                display: block;
+            }
+
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0);
+                }
+                25% {
+                    transform: translateX(-10px);
+                }
+                75% {
+                    transform: translateX(10px);
+                }
+            }
+
+            .confidence-check {
+                background: #e3f2fd;
+                border: 2px solid #2196f3;
+                border-radius: 10px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .confidence-check label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                font-size: 1.05em;
+                color: #333;
+            }
+
+            .confidence-check input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+
+            .hint-box {
+                background: #fff9e6;
+                border-left: 4px solid #ffd54f;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 5px;
+                font-size: 0.95em;
+                color: #666;
+            }
+
+            .loading {
+                display: none;
+                text-align: center;
+                color: #667eea;
+                font-weight: bold;
+                margin-top: 20px;
+            }
+
+            .loading.show {
+                display: block;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(102, 126, 234, 0.3);
+                border-top-color: #667eea;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🎯 Submit Your Final Answer</h1>
+            <p class="subtitle">Ready to solve the puzzle?</p>
+
+            <div class="warning-box">
+                <h2>⚠️ Final Submission</h2>
+                <p>
+                    This is your final answer! Make sure you've deduced the
+                    correct code from the verifier results. You only get one
+                    chance!
+                </p>
+            </div>
+
+            <div class="stats-summary">
+                <h3>📊 Your Progress</h3>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="guessCount">0</div>
+                        <div class="stat-label">Guesses Made</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guess-section">
+                <h2>Enter the Secret Code</h2>
+
+                <div class="error-message" id="errorMessage">
+                    Please enter three digits, each between 1 and 5
+                </div>
+
+                <div class="input-area">
+                    <div class="digit-input-wrapper">
+                        <div class="digit-label color-blue">BLUE (1st)</div>
+                        <input
+                            type="number"
+                            class="digit-input blue-border"
+                            id="digit1"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                            autofocus
+                        />
+                    </div>
+                    <div class="digit-input-wrapper">
+                        <div class="digit-label color-yellow">YELLOW (2nd)</div>
+                        <input
+                            type="number"
+                            class="digit-input yellow-border"
+                            id="digit2"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                    <div class="digit-input-wrapper">
+                        <div class="digit-label color-purple">PURPLE (3rd)</div>
+                        <input
+                            type="number"
+                            class="digit-input purple-border"
+                            id="digit3"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                </div>
+
+                <div class="confidence-check">
+                    <label>
+                        <input type="checkbox" id="confirmCheck" />
+                        I am confident this is the correct answer
+                    </label>
+                </div>
+
+                <div class="hint-box">
+                    💭 <strong>Double-check:</strong> Review all your previous
+                    guesses and verifier results. Make sure every constraint is
+                    satisfied by your answer!
+                </div>
+
+                <div class="loading" id="loading">
+                    <span class="spinner"></span>
+                    Checking your answer...
+                </div>
+
+                <div class="button-group">
+                    <button
+                        class="btn btn-submit"
+                        onclick="submitFinalAnswer()"
+                        id="submitBtn"
+                    >
+                        🔐 Submit Final Answer
+                    </button>
+                    <button class="btn btn-back" onclick="goBack()">
+                        ← Back to Guessing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Load stats from previous guesses
+            window.onload = function () {
+                setupInputHandlers();
+                loadStats();
+                updateSubmitButton();
+            };
+
+            function setupInputHandlers() {
+                const inputs = [
+                    document.getElementById("digit1"),
+                    document.getElementById("digit2"),
+                    document.getElementById("digit3"),
+                ];
+
+                inputs.forEach((input, index) => {
+                    input.addEventListener("input", function (e) {
+                        // Limit to 1 digit
+                        if (this.value.length > 1) {
+                            this.value = this.value.slice(0, 1);
+                        }
+
+                        // Validate range
+                        const val = parseInt(this.value);
+                        if (val < 1 || val > 5) {
+                            this.value = "";
+                        }
+
+                        // Auto-advance to next input
+                        if (this.value && index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    });
+
+                    // Allow Enter to submit (if confirmed)
+                    input.addEventListener("keypress", function (e) {
+                        if (
+                            e.key === "Enter" &&
+                            document.getElementById("confirmCheck").checked
+                        ) {
+                            submitFinalAnswer();
+                        }
+                    });
+                });
+
+                // Update button state when checkbox changes
+                document
+                    .getElementById("confirmCheck")
+                    .addEventListener("change", updateSubmitButton);
+            }
+
+            function loadStats() {
+                // TODO: Load actual game statistics
+                // GET /api/puzzle/stats
+
+                guessCount = sessionStorage.getItem("guessCount");
+                if (guessCount !== null) {
+                    document.getElementById("guessCount").textContent =
+                        guessCount;
+                }
+            }
+
+            function updateSubmitButton() {
+                const btn = document.getElementById("submitBtn");
+                const isConfirmed =
+                    document.getElementById("confirmCheck").checked;
+                btn.disabled = !isConfirmed;
+            }
+
+            function submitFinalAnswer() {
+                const digit1 = document.getElementById("digit1").value;
+                const digit2 = document.getElementById("digit2").value;
+                const digit3 = document.getElementById("digit3").value;
+
+                // Validate input
+                if (!digit1 || !digit2 || !digit3) {
+                    showError("Please enter all three digits");
+                    return;
+                }
+
+                const answer = `${digit1}${digit2}${digit3}`;
+
+                // Validate each digit is 1-5
+                if (!/^[1-5]{3}$/.test(answer)) {
+                    showError("Each digit must be between 1 and 5");
+                    return;
+                }
+
+                // Check confirmation
+                if (!document.getElementById("confirmCheck").checked) {
+                    showError(
+                        "Please confirm you are confident in your answer",
+                    );
+                    return;
+                }
+
+                // Show loading
+                document.getElementById("loading").classList.add("show");
+                document.getElementById("submitBtn").disabled = true;
+
+                axios
+                    .get(`/check_final?guess=${answer}`)
+                    .then((response) => {
+                        const results = response.data;
+                        const successful = results.status === "success";
+                        if (successful) {
+                            window.location.href = "success?answer=" + answer;
+                        } else {
+                            window.location.href = "failure?answer=" + answer;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        showError("Failed to send guess");
+                    });
+            }
+
+            function showError(message) {
+                const errorEl = document.getElementById("errorMessage");
+                errorEl.textContent = message;
+                errorEl.classList.add("show");
+
+                setTimeout(() => {
+                    errorEl.classList.remove("show");
+                }, 3000);
+            }
+
+            function goBack() {
+                if (confirm("Go back to continue guessing?")) {
+                    window.location.href = "guess";
+                }
+            }
+        </script>
+    </body>
+</html>
