@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script
+            src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
+            integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
+            crossorigin="anonymous"
+        ></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Try Again - Turing Machine</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#f44336] to-[#e91e63] min-h-screen flex justify-center items-center p-5"
+    >
+        <div
+            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] py-12 px-10 text-center animate-slide-in"
+        >
+            <div class="text-[100px] mb-5 animate-sway">😔</div>
+            <h1 class="text-[#f44336] text-4xl mb-4 font-bold">
+                Not Quite Right
+            </h1>
+            <p class="text-[#666] text-xl mb-7">
+                But don't give up! Every puzzle is a learning opportunity.
+            </p>
+
+            <div class="grid grid-cols-2 gap-5 my-7 max-sm:grid-cols-1">
+                <div
+                    class="p-6 rounded-2xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] bg-[#ffebee] border-[3px] border-[#f44336]"
+                >
+                    <h3 class="mb-4 text-lg text-[#f44336] font-bold">
+                        Your Answer
+                    </h3>
+                    <div
+                        class="flex justify-center gap-2.5 mt-4"
+                        id="yourAnswer"
+                    >
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#f44336] border-2 border-[#f44336]"
+                        >
+                            ?
+                        </div>
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#f44336] border-2 border-[#f44336]"
+                        >
+                            ?
+                        </div>
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#f44336] border-2 border-[#f44336]"
+                        >
+                            ?
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="p-6 rounded-2xl shadow-[0_4px_10px_rgba(0,0,0,0.1)] bg-[#e8f5e9] border-[3px] border-[#4caf50]"
+                >
+                    <h3 class="mb-4 text-lg text-[#4caf50] font-bold">
+                        Correct Answer
+                    </h3>
+                    <div
+                        class="flex justify-center gap-2.5 mt-4"
+                        id="correctAnswer"
+                    >
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#4caf50] border-2 border-[#4caf50]"
+                        >
+                            ?
+                        </div>
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#4caf50] border-2 border-[#4caf50]"
+                        >
+                            ?
+                        </div>
+                        <div
+                            class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] text-[#4caf50] border-2 border-[#4caf50]"
+                        >
+                            ?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-[#fff9e6] border-2 border-[#ffc107] rounded-lg p-6 my-7 text-left"
+            >
+                <h3 class="text-[#f57c00] mb-4 text-center font-bold">
+                    What Went Wrong?
+                </h3>
+                <p class="text-[#666] leading-relaxed mb-2.5">
+                    <strong
+                        >Your answer didn't satisfy all the verifier
+                        constraints.</strong
+                    >
+                </p>
+                <p id="detailedExplanation" class="text-[#666] leading-relaxed">
+                    The correct solution must make all four verifiers return
+                    TRUE. Review your previous guesses and the verifier results
+                    to see which constraints you might have missed.
+                </p>
+            </div>
+
+            <div class="bg-[#f8f9fa] p-6 rounded-2xl my-7">
+                <h3 class="text-[#333] mb-5 font-bold">Your Attempt</h3>
+                <div
+                    class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4"
+                >
+                    <div
+                        class="bg-white p-5 rounded-lg border-2 border-[#e0e0e0]"
+                    >
+                        <div
+                            class="text-4xl font-bold text-[#667eea] mb-1"
+                            id="guessCount"
+                        >
+                            0
+                        </div>
+                        <div class="text-sm text-[#666]">Guesses Made</div>
+                    </div>
+                    <div
+                        class="bg-white p-5 rounded-lg border-2 border-[#e0e0e0]"
+                    >
+                        <div
+                            class="text-4xl font-bold text-[#667eea] mb-1"
+                            id="closeness"
+                        >
+                            ?/3
+                        </div>
+                        <div class="text-sm text-[#666]">Digits Correct</div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-[#e3f2fd] border-l-4 border-[#2196f3] p-5 my-6 rounded text-base text-[#1565c0] leading-relaxed"
+            >
+                <strong>Logic puzzles take practice!</strong> Even master
+                detectives sometimes need multiple attempts. The key is to
+                carefully track which constraints are satisfied and which
+                aren't. Each guess gives you valuable information!
+            </div>
+
+            <div class="bg-[#fafafa] p-5 rounded-lg mt-7">
+                <h3 class="text-[#333] mb-4 font-bold">Tips for Next Time</h3>
+                <ul class="text-left list-none p-0">
+                    <li
+                        class="py-2.5 text-[#666] border-b border-[#e0e0e0] before:content-['💡'] before:mr-2.5"
+                    >
+                        Track which combinations make each verifier TRUE or
+                        FALSE
+                    </li>
+                    <li
+                        class="py-2.5 text-[#666] border-b border-[#e0e0e0] before:content-['💡'] before:mr-2.5"
+                    >
+                        Eliminate impossible solutions systematically
+                    </li>
+                    <li
+                        class="py-2.5 text-[#666] border-b border-[#e0e0e0] before:content-['💡'] before:mr-2.5"
+                    >
+                        Look for patterns in the verifier results
+                    </li>
+                    <li
+                        class="py-2.5 text-[#666] border-b border-[#e0e0e0] before:content-['💡'] before:mr-2.5"
+                    >
+                        Start with guesses at the extremes (like 111 or 555)
+                    </li>
+                    <li
+                        class="py-2.5 text-[#666] before:content-['💡'] before:mr-2.5"
+                    >
+                        Make sure your final answer satisfies ALL verifiers
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mt-7">
+                <button
+                    class="py-4 px-10 text-xl font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white m-2.5 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                    onclick="tryAgain()"
+                >
+                    Try New Puzzle
+                </button>
+                <button
+                    class="py-4 px-10 text-xl font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#757575] text-white m-2.5 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                    onclick="goHome()"
+                >
+                    Home
+                </button>
+            </div>
+        </div>
+
+        <script>
+            window.onload = function () {
+                loadResults();
+            };
+
+            function loadResults() {
+                // Get answer from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const yourAnswer = urlParams.get("answer") || "123";
+
+                // TODO: Get correct answer from backend
+                // GET /api/puzzle/solution
+                const correctAnswer = "345"; // Mock data
+
+                // Display answers
+                displayAnswer("yourAnswer", yourAnswer, "#f44336");
+                displayAnswer("correctAnswer", correctAnswer, "#4caf50");
+
+                // Calculate how close the answer was
+                const correctDigits = countCorrectDigits(
+                    yourAnswer,
+                    correctAnswer,
+                );
+                document.getElementById("closeness").textContent =
+                    `${correctDigits}/3`;
+
+                // TODO: Load actual game statistics from backend
+                const guesses = Math.floor(Math.random() * 10) + 5;
+                document.getElementById("guessCount").textContent = guesses;
+
+                // Generate explanation
+                generateExplanation(yourAnswer, correctAnswer);
+            }
+
+            function displayAnswer(elementId, answer, color) {
+                const digits = answer.split("");
+                const container = document.getElementById(elementId);
+                const borderColor =
+                    color === "#f44336"
+                        ? "border-[#f44336]"
+                        : "border-[#4caf50]";
+                const textColor =
+                    color === "#f44336" ? "text-[#f44336]" : "text-[#4caf50]";
+                container.innerHTML = digits
+                    .map(
+                        (d) =>
+                            `<div class="w-[70px] h-[70px] bg-white rounded-xl flex items-center justify-center text-4xl font-bold shadow-[0_2px_8px_rgba(0,0,0,0.15)] ${textColor} border-2 ${borderColor}">${d}</div>`,
+                    )
+                    .join("");
+            }
+
+            function countCorrectDigits(yourAnswer, correctAnswer) {
+                let count = 0;
+                for (let i = 0; i < 3; i++) {
+                    if (yourAnswer[i] === correctAnswer[i]) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
+            function generateExplanation(yourAnswer, correctAnswer) {
+                const correctDigits = countCorrectDigits(
+                    yourAnswer,
+                    correctAnswer,
+                );
+                const explanationEl = document.getElementById(
+                    "detailedExplanation",
+                );
+
+                let explanation = `The correct solution must make all four verifiers return TRUE. `;
+
+                if (correctDigits === 0) {
+                    explanation += `Unfortunately, none of your digits matched the correct positions. Try using the verifier feedback more systematically to narrow down each digit position.`;
+                } else if (correctDigits === 1) {
+                    explanation += `You got ${correctDigits} digit in the correct position! You were on the right track, but needed to use the verifier constraints to deduce the other two digits.`;
+                } else if (correctDigits === 2) {
+                    explanation += `You were so close! You got ${correctDigits} digits correct. One more careful deduction from the verifier results would have given you the answer.`;
+                }
+
+                explanationEl.innerHTML = `<p class="text-[#666] leading-relaxed mb-2.5"><strong>Your answer didn't satisfy all the verifier constraints.</strong></p><p class="text-[#666] leading-relaxed">${explanation}</p>`;
+            }
+
+            function tryAgain() {
+                window.location.href = "welcome";
+            }
+
+            function goHome() {
+                window.location.href = "welcome";
+            }
+        </script>
+    </body>
+</html>

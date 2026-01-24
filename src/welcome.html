@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script
+            src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
+            integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
+            crossorigin="anonymous"
+        ></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Turing Machine - Logic Puzzle Game</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#667eea] to-[#764ba2] min-h-screen flex justify-center items-center p-5"
+    >
+        <div
+            class="max-w-[800px] bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+        >
+            <h1 class="text-[#333] text-center mb-2.5 text-4xl font-bold">
+                Turing Machine
+            </h1>
+            <p class="text-center text-[#666] mb-7 text-lg">
+                A Logic Puzzle Game
+            </p>
+            <p class="text-center text-sm text-[#888] mb-7">
+                Inspired by
+                <a
+                    href="https://www.scorpionmasque.com/en/turingmachine"
+                    target="_blank"
+                    class="text-[#667eea] no-underline hover:underline"
+                    >Scorpion Masque's Turing Machine</a
+                >
+            </p>
+
+            <div class="bg-[#f8f9fa] p-5 rounded-lg mb-7 leading-relaxed">
+                <p>
+                    Welcome to Turing Machine! Can you crack the secret code
+                    using logic and deduction? Use the verifiers to narrow down
+                    the possibilities and discover the hidden three-digit
+                    number.
+                </p>
+            </div>
+
+            <div
+                class="bg-[#e8f5e9] border-l-4 border-[#4caf50] p-4 mb-5 rounded"
+            >
+                <strong>Objective:</strong> Deduce the secret three-digit code
+                where each digit ranges from 1 to 5.
+            </div>
+
+            <div class="text-center text-xl text-[#667eea] font-bold my-5">
+                125 Possible Combinations (111 - 555)
+            </div>
+
+            <h2 class="text-[#667eea] mt-7 mb-4 text-2xl font-bold">
+                How to Play
+            </h2>
+            <ul class="list-none mb-5">
+                <li
+                    class="py-2.5 border-b border-[#eee] before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    Each game has a hidden three-digit code (e.g., 3-4-2)
+                </li>
+                <li
+                    class="py-2.5 border-b border-[#eee] before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    Each digit can be 1, 2, 3, 4, or 5
+                </li>
+                <li
+                    class="py-2.5 border-b border-[#eee] before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    You have four verifiers that check different properties of
+                    your guess
+                </li>
+                <li
+                    class="py-2.5 border-b border-[#eee] before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    Submit guesses to see which verifiers return TRUE or FALSE
+                </li>
+                <li
+                    class="py-2.5 border-b border-[#eee] before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    Use logic to eliminate impossible combinations
+                </li>
+                <li
+                    class="py-2.5 before:content-['✓'] before:text-[#4caf50] before:font-bold before:mr-2.5"
+                >
+                    Submit your final answer when you've deduced the code
+                </li>
+            </ul>
+
+            <h2 class="text-[#667eea] mt-7 mb-4 text-2xl font-bold">
+                Position Colors
+            </h2>
+            <p>Each digit position has an associated color:</p>
+            <div class="flex justify-around flex-wrap gap-4 my-5">
+                <div
+                    class="flex-1 min-w-[150px] p-4 rounded-lg text-center text-white font-bold bg-[#2196f3]"
+                >
+                    BLUE<br />1st Digit
+                </div>
+                <div
+                    class="flex-1 min-w-[150px] p-4 rounded-lg text-center font-bold bg-[#ffc107] text-[#333]"
+                >
+                    YELLOW<br />2nd Digit
+                </div>
+                <div
+                    class="flex-1 min-w-[150px] p-4 rounded-lg text-center text-white font-bold bg-[#9c27b0]"
+                >
+                    PURPLE<br />3rd Digit
+                </div>
+            </div>
+
+            <h2 class="text-[#667eea] mt-7 mb-4 text-2xl font-bold">
+                Verifier Types
+            </h2>
+            <p>Each game randomly selects four verifiers from these types:</p>
+            <div
+                class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 my-5"
+            >
+                <div
+                    class="bg-white border-2 border-[#667eea] rounded-lg p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(102,126,234,0.3)]"
+                >
+                    <h3 class="text-[#667eea] text-base mb-2 font-bold">
+                        Count Checker
+                    </h3>
+                    <p class="text-sm text-[#666] leading-snug">
+                        Verifies if your guess has the same count of a specific
+                        digit as the solution
+                    </p>
+                </div>
+                <div
+                    class="bg-white border-2 border-[#667eea] rounded-lg p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(102,126,234,0.3)]"
+                >
+                    <h3 class="text-[#667eea] text-base mb-2 font-bold">
+                        Position Comparator
+                    </h3>
+                    <p class="text-sm text-[#666] leading-snug">
+                        Compares a digit at a specific position (color) to a
+                        target number using &lt;, =, or &gt;
+                    </p>
+                </div>
+                <div
+                    class="bg-white border-2 border-[#667eea] rounded-lg p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(102,126,234,0.3)]"
+                >
+                    <h3 class="text-[#667eea] text-base mb-2 font-bold">
+                        Parity Checker
+                    </h3>
+                    <p class="text-sm text-[#666] leading-snug">
+                        Checks if the sum of all three digits is odd or even
+                    </p>
+                </div>
+                <div
+                    class="bg-white border-2 border-[#667eea] rounded-lg p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(102,126,234,0.3)]"
+                >
+                    <h3 class="text-[#667eea] text-base mb-2 font-bold">
+                        Repetition Detector
+                    </h3>
+                    <p class="text-sm text-[#666] leading-snug">
+                        Verifies if any digit repeats itself (e.g., 1-1-3 has
+                        one digit repeating twice)
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="bg-[#fff9e6] border-2 border-[#ffd54f] rounded-lg p-5 my-5"
+            >
+                <h3 class="text-[#f57c00] mb-2.5 font-bold">Example Round</h3>
+                <p><strong>Your Guess:</strong></p>
+                <div class="flex justify-center gap-2.5 my-4">
+                    <div
+                        class="w-[60px] h-[60px] flex items-center justify-center text-3xl font-bold rounded-lg bg-white border-[3px] border-[#333]"
+                    >
+                        3
+                    </div>
+                    <div
+                        class="w-[60px] h-[60px] flex items-center justify-center text-3xl font-bold rounded-lg bg-white border-[3px] border-[#333]"
+                    >
+                        4
+                    </div>
+                    <div
+                        class="w-[60px] h-[60px] flex items-center justify-center text-3xl font-bold rounded-lg bg-white border-[3px] border-[#333]"
+                    >
+                        2
+                    </div>
+                </div>
+                <p><strong>Verifier Results:</strong></p>
+                <div class="text-center mt-2.5">
+                    <span
+                        class="inline-block py-1.5 px-4 rounded font-bold m-1 bg-[#4caf50] text-white"
+                        >Verifier A: TRUE</span
+                    >
+                    <span
+                        class="inline-block py-1.5 px-4 rounded font-bold m-1 bg-[#f44336] text-white"
+                        >Verifier B: FALSE</span
+                    >
+                    <span
+                        class="inline-block py-1.5 px-4 rounded font-bold m-1 bg-[#4caf50] text-white"
+                        >Verifier C: TRUE</span
+                    >
+                    <span
+                        class="inline-block py-1.5 px-4 rounded font-bold m-1 bg-[#f44336] text-white"
+                        >Verifier D: FALSE</span
+                    >
+                </div>
+                <p class="mt-4 text-sm text-[#666]">
+                    Use these results to eliminate possibilities and make your
+                    next guess!
+                </p>
+            </div>
+
+            <div
+                class="bg-[#e3f2fd] border-l-4 border-[#2196f3] p-4 my-5 rounded text-[0.95em]"
+            >
+                <strong>Strategy Tip:</strong> The verifiers are carefully
+                chosen to uniquely identify the solution. Start with systematic
+                guesses (like 1-1-1 or 5-5-5) to gather maximum information
+                about the constraints!
+            </div>
+            <script>
+                function goToGuessPage() {
+                    window.location.href = "guess";
+                }
+            </script>
+            <button
+                class="block w-full max-w-[300px] mx-auto my-7 py-4 px-7 text-xl font-bold text-white bg-gradient-to-br from-[#667eea] to-[#764ba2] border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(102,126,234,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(102,126,234,0.6)] active:translate-y-0"
+                onclick="goToGuessPage()"
+            >
+                Start New Game
+            </button>
+        </div>
+    </body>
+</html>

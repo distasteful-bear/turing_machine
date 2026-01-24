@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Make a Guess - Turing Machine</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#667eea] to-[#764ba2] min-h-screen flex justify-center items-center p-5"
+    >
+        <div
+            class="max-w-[900px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+        >
+            <h1 class="text-[#333] text-center mb-7 text-3xl font-bold">
+                Make Your Guess
+            </h1>
+
+            <div class="flex justify-around mb-5 flex-wrap gap-2.5">
+                <div class="text-center py-2.5 px-5 bg-[#f8f9fa] rounded-lg">
+                    <div
+                        class="text-2xl font-bold text-[#667eea]"
+                        id="guessCount"
+                    >
+                        0
+                    </div>
+                    <div class="text-sm text-[#666]">Guesses Made</div>
+                </div>
+                <div class="text-center py-2.5 px-5 bg-[#f8f9fa] rounded-lg">
+                    <div
+                        class="text-2xl font-bold text-[#667eea]"
+                        id="possibilities"
+                    >
+                        125
+                    </div>
+                    <div class="text-sm text-[#666]">Possibilities</div>
+                </div>
+            </div>
+
+            <div class="bg-[#f8f9fa] p-5 rounded-lg mb-7">
+                <h2 class="text-[#667eea] mb-4 text-xl font-bold">
+                    Verifiers for This Puzzle
+                </h2>
+                <div class="grid gap-2.5" id="verifierList">
+                    <div
+                        class="bg-white p-4 rounded-lg border-l-4 border-[#667eea] flex items-center gap-4"
+                    >
+                        <div
+                            class="bg-[#667eea] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                        >
+                            A
+                        </div>
+                        <div class="flex-1 text-[#333]">
+                            Loading verifiers...
+                        </div>
+                        <span
+                            class="py-1.5 px-4 rounded font-bold min-w-[70px] text-center bg-[#e0e0e0] text-[#666]"
+                            >—</span
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-7">
+                <h2 class="text-[#333] mb-5 text-center text-xl font-bold">
+                    Enter Your Guess
+                </h2>
+
+                <div
+                    class="hidden bg-[#ffebee] border-l-4 border-[#f44336] p-4 my-5 rounded text-[#c62828] animate-shake"
+                    id="errorMessage"
+                >
+                    Please enter three digits, each between 1 and 5
+                </div>
+
+                <div class="flex justify-center gap-4 mb-5 flex-wrap">
+                    <div class="text-center">
+                        <div class="text-sm text-[#2196f3] mb-1.5 font-bold">
+                            BLUE (1st)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-20 h-20 text-4xl text-center border-[3px] border-[#ddd] rounded-lg font-bold transition-all duration-300 focus:outline-none focus:border-[#2196f3] focus:scale-105"
+                            id="digit1"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-[#ffc107] mb-1.5 font-bold">
+                            YELLOW (2nd)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-20 h-20 text-4xl text-center border-[3px] border-[#ddd] rounded-lg font-bold transition-all duration-300 focus:outline-none focus:border-[#ffc107] focus:scale-105"
+                            id="digit2"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-[#9c27b0] mb-1.5 font-bold">
+                            PURPLE (3rd)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-20 h-20 text-4xl text-center border-[3px] border-[#ddd] rounded-lg font-bold transition-all duration-300 focus:outline-none focus:border-[#9c27b0] focus:scale-105"
+                            id="digit3"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                </div>
+
+                <div
+                    class="bg-[#e3f2fd] border-l-4 border-[#2196f3] p-4 my-5 rounded"
+                >
+                    <strong>Tip:</strong> Each digit must be between 1 and 5.
+                    Watch how the verifiers respond to eliminate impossible
+                    combinations!
+                </div>
+
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <button
+                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        onclick="submitGuess()"
+                    >
+                        Check This Guess
+                    </button>
+                    <button
+                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#4caf50] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        onclick="goToFinalAnswer()"
+                        id="finalAnswerBtn"
+                    >
+                        Submit Final Answer
+                    </button>
+                    <button
+                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#ff9800] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        onclick="resetGame()"
+                    >
+                        Start Over
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="mt-7 pt-7 border-t-2 border-[#eee] hidden"
+                id="guessHistory"
+            >
+                <h3 class="text-[#333] mb-4 font-bold">Previous Guesses</h3>
+                <div id="historyList">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+        </div>
+        <script>
+            // Game state
+            let guessHistory = [];
+            var verifiers = [];
+            let currentPuzzleId = null;
+
+            // Initialize the page
+            window.onload = function () {
+                loadPuzzle();
+                setupInputHandlers();
+            };
+
+            function setupInputHandlers() {
+                // Auto-focus next input
+                const inputs = [
+                    document.getElementById("digit1"),
+                    document.getElementById("digit2"),
+                    document.getElementById("digit3"),
+                ];
+
+                inputs.forEach((input, index) => {
+                    input.addEventListener("input", function (e) {
+                        // Limit to 1 digit
+                        if (this.value.length > 1) {
+                            this.value = this.value.slice(0, 1);
+                        }
+
+                        // Validate range
+                        const val = parseInt(this.value);
+                        if (val < 1 || val > 5) {
+                            this.value = "";
+                        }
+
+                        // Auto-advance to next input
+                        if (this.value && index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    });
+
+                    // Allow Enter to submit
+                    input.addEventListener("keypress", function (e) {
+                        if (e.key === "Enter") {
+                            submitGuess();
+                        }
+                    });
+                });
+            }
+            function loadPuzzle() {
+                axios
+                    .get("/setup_session")
+                    .then((response) => {
+                        const puzzle = response.data;
+                        console.log(puzzle["puzzle_summary"]);
+                        verifiers = puzzle["puzzle_summary"].map((r) => ({
+                            id: r.id,
+                            description: r.description,
+                            result: r.result,
+                        }));
+                        renderVerifiers(verifiers);
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching puzzle:", error);
+                        renderVerifiers([]);
+                    });
+            }
+
+            function renderVerifiers(verifiers) {
+                const verifierList = document.getElementById("verifierList");
+                const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+                console.log(verifiers);
+                verifierList.innerHTML = verifiers
+                    .map(
+                        (v) => `
+                          <div class="bg-white p-4 rounded-lg border-l-4 border-[#667eea] flex items-center gap-4">
+                              <div class="bg-[#667eea] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0">${letters[v["id"]] || String(v["id"] + 1)}</div>
+                              <div class="flex-1 text-[#333]">${v.description}</div>
+                              <span class="py-1.5 px-4 rounded font-bold min-w-[70px] text-center ${getResultClass(v.result)}" id="result-${v.id}">
+                                  ${getResultText(v.result)}
+                              </span>
+                          </div>
+                      `,
+                    )
+                    .join("");
+            }
+
+            function getResultClass(result) {
+                if (result === "true") return "bg-[#4caf50] text-white";
+                if (result === "false") return "bg-[#f44336] text-white";
+                return "bg-[#e0e0e0] text-[#666]";
+            }
+
+            function getResultText(result) {
+                if (result === "true") return "true";
+                if (result === "false") return "false";
+                return "—";
+            }
+
+            function submitGuess() {
+                const digit1 = document.getElementById("digit1").value;
+                const digit2 = document.getElementById("digit2").value;
+                const digit3 = document.getElementById("digit3").value;
+
+                // Validate input
+                if (!digit1 || !digit2 || !digit3) {
+                    showError("Please enter all three digits");
+                    return;
+                }
+
+                const guess = `${digit1}${digit2}${digit3}`;
+
+                // Validate each digit is 1-5
+                if (!/^[1-5]{3}$/.test(guess)) {
+                    showError("Each digit must be between 1 and 5");
+                    return;
+                }
+
+                // TODO: Send guess to backend
+                // POST /api/guess with { guess: guess }
+                // Response should include verifier results
+                axios
+                    .get(`/check_guess?guess=${guess}`)
+                    .then((response) => {
+                        const results = response.data.puzzle_summary;
+                        renderVerifiers(results);
+                        addToHistory(guess, results);
+                        updateStats();
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        showError("Failed to send guess");
+                    });
+            }
+
+            function addToHistory(guess, results) {
+                guessHistory.push({ guess, results });
+
+                const historySection = document.getElementById("guessHistory");
+                const historyList = document.getElementById("historyList");
+
+                historySection.style.display = "block";
+                historySection.classList.remove("hidden");
+
+                const historyItem = document.createElement("div");
+                historyItem.className =
+                    "bg-[#f8f9fa] p-4 rounded-lg mb-2.5 flex justify-between items-center flex-wrap gap-2.5";
+                historyItem.innerHTML = `
+                <div class="font-bold text-xl text-[#333]">${guess.split("").join(" - ")}</div>
+                <div class="flex gap-1.5 flex-wrap">
+                    <span class="py-1.5 px-4 rounded font-bold ${results[0].result == "true" ? "bg-[#4caf50] text-white" : "bg-[#f44336] text-white"}">A</span>
+                    <span class="py-1.5 px-4 rounded font-bold ${results[1].result == "true" ? "bg-[#4caf50] text-white" : "bg-[#f44336] text-white"}">B</span>
+                    <span class="py-1.5 px-4 rounded font-bold ${results[2].result == "true" ? "bg-[#4caf50] text-white" : "bg-[#f44336] text-white"}">C</span>
+                    <span class="py-1.5 px-4 rounded font-bold ${results[3].result == "true" ? "bg-[#4caf50] text-white" : "bg-[#f44336] text-white"}">D</span>
+                </div>
+            `;
+
+                historyList.insertBefore(historyItem, historyList.firstChild);
+            }
+
+            function updateStats() {
+                document.getElementById("guessCount").textContent =
+                    guessHistory.length;
+                sessionStorage.setItem(
+                    "guessCount",
+                    String(guessHistory.length),
+                );
+                // TODO: Calculate actual remaining possibilities based on constraints
+            }
+
+            function clearInputs() {
+                document.getElementById("digit1").value = "";
+                document.getElementById("digit2").value = "";
+                document.getElementById("digit3").value = "";
+                document.getElementById("digit1").focus();
+            }
+
+            function showError(message) {
+                const errorEl = document.getElementById("errorMessage");
+                errorEl.textContent = message;
+                errorEl.classList.remove("hidden");
+                errorEl.classList.add("block", "animate-shake");
+
+                setTimeout(() => {
+                    errorEl.classList.add("hidden");
+                    errorEl.classList.remove("block", "animate-shake");
+                }, 3000);
+            }
+
+            function goToFinalAnswer() {
+                if (guessHistory.length === 0) {
+                    showError(
+                        "Make at least one guess before submitting your final answer!",
+                    );
+                    return;
+                }
+                window.location.href = "final";
+            }
+
+            function resetGame() {
+                if (
+                    confirm(
+                        "Are you sure you want to start over? This will reset the puzzle.",
+                    )
+                ) {
+                    window.location.href = "welcome";
+                }
+            }
+        </script>
+    </body>
+</html>

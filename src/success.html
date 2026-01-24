@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Success! - Turing Machine</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#4caf50] to-[#45a049] min-h-screen flex justify-center items-center p-5"
+    >
+        <div
+            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] py-12 px-10 text-center animate-celebration relative z-10"
+        >
+            <div class="text-[120px] mb-5 animate-bounce-slow">🏆</div>
+            <h1 class="text-[#4caf50] text-5xl mb-4 animate-fade-in font-bold">
+                Congratulations!
+            </h1>
+            <p class="text-[#666] text-xl mb-7">You cracked the code!</p>
+
+            <div
+                class="bg-gradient-to-br from-[#4caf50] to-[#45a049] text-white p-7 rounded-2xl my-7 shadow-[0_8px_20px_rgba(76,175,80,0.3)]"
+            >
+                <h2 class="text-xl mb-4 opacity-90 font-bold">
+                    The Secret Code Was:
+                </h2>
+                <div class="flex justify-center gap-4 mt-4" id="answerDisplay">
+                    <div
+                        class="w-20 h-20 bg-white text-[#4caf50] rounded-2xl flex items-center justify-center text-5xl font-bold shadow-[0_4px_10px_rgba(0,0,0,0.2)] animate-pop-in-1"
+                    >
+                        ?
+                    </div>
+                    <div
+                        class="w-20 h-20 bg-white text-[#4caf50] rounded-2xl flex items-center justify-center text-5xl font-bold shadow-[0_4px_10px_rgba(0,0,0,0.2)] animate-pop-in-2"
+                    >
+                        ?
+                    </div>
+                    <div
+                        class="w-20 h-20 bg-white text-[#4caf50] rounded-2xl flex items-center justify-center text-5xl font-bold shadow-[0_4px_10px_rgba(0,0,0,0.2)] animate-pop-in-3"
+                    >
+                        ?
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-lg text-[#666] my-5 italic">
+                <p id="congratsMessage">"Excellent deduction, detective!"</p>
+            </div>
+
+            <div class="bg-[#f8f9fa] p-6 rounded-2xl my-7">
+                <h3 class="text-[#333] mb-5 text-xl font-bold">
+                    Your Performance
+                </h3>
+                <div
+                    class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4"
+                >
+                    <div
+                        class="bg-white p-5 rounded-lg border-2 border-[#4caf50]"
+                    >
+                        <div
+                            class="text-4xl font-bold text-[#4caf50] mb-1"
+                            id="guessCount"
+                        >
+                            0
+                        </div>
+                        <div class="text-sm text-[#666]">Guesses</div>
+                    </div>
+                    <div
+                        class="bg-white p-5 rounded-lg border-2 border-[#4caf50]"
+                    >
+                        <div
+                            class="text-4xl font-bold text-[#4caf50] mb-1"
+                            id="accuracy"
+                        >
+                            100%
+                        </div>
+                        <div class="text-sm text-[#666]">Success</div>
+                    </div>
+                    <div
+                        class="bg-white p-5 rounded-lg border-2 border-[#4caf50]"
+                    >
+                        <div
+                            class="text-4xl font-bold text-[#4caf50] mb-1"
+                            id="efficiency"
+                        >
+                            ⭐⭐⭐
+                        </div>
+                        <div class="text-sm text-[#666]">Efficiency</div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-[#e8f5e9] border-2 border-[#4caf50] rounded-lg p-5 my-6 text-lg text-[#2e7d32] leading-relaxed"
+            >
+                <strong>Perfect logic!</strong> You've successfully used
+                deductive reasoning to eliminate impossible combinations and
+                identify the unique solution. That's the power of the Turing
+                Machine!
+            </div>
+
+            <div class="mt-7 pt-7 border-t-2 border-[#eee]">
+                <h3 class="text-[#333] mb-4 font-bold">Share Your Victory</h3>
+                <div
+                    class="bg-[#f8f9fa] p-4 rounded-lg font-mono mb-4 cursor-pointer transition-colors duration-300 hover:bg-[#e9ecef]"
+                    id="shareText"
+                    onclick="copyShareText()"
+                >
+                    I solved today's Turing Machine puzzle in X guesses!
+                </div>
+                <p class="text-[#666] text-sm">Click to copy</p>
+            </div>
+
+            <div class="mt-7">
+                <button
+                    class="py-4 px-10 text-xl font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white m-2.5 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                    onclick="playAgain()"
+                >
+                    Play Again
+                </button>
+                <button
+                    class="py-4 px-10 text-xl font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#757575] text-white m-2.5 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                    onclick="goHome()"
+                >
+                    Home
+                </button>
+            </div>
+        </div>
+
+        <script>
+            // Congratulations messages
+            const congratsMessages = [
+                "Excellent deduction, detective!",
+                "Your logical thinking is impeccable!",
+                "You've mastered the art of deduction!",
+                "Sherlock would be proud!",
+                "Logic prevails once again!",
+                "A brilliant mind at work!",
+                "You've cracked the code like a true genius!",
+                "Outstanding problem-solving skills!",
+            ];
+
+            window.onload = function () {
+                loadResults();
+                createConfetti();
+                displayRandomMessage();
+
+                // Play success sound (optional)
+                // const audio = new Audio('success.mp3');
+                // audio.play();
+            };
+
+            function loadResults() {
+                // Get answer from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const answer = urlParams.get("answer") || "123";
+
+                // Display answer
+                const digits = answer.split("");
+                const answerDisplay = document.getElementById("answerDisplay");
+                answerDisplay.innerHTML = digits
+                    .map(
+                        (d, i) =>
+                            `<div class="w-20 h-20 bg-white text-[#4caf50] rounded-2xl flex items-center justify-center text-5xl font-bold shadow-[0_4px_10px_rgba(0,0,0,0.2)] animate-pop-in-${i + 1}">${d}</div>`,
+                    )
+                    .join("");
+
+                // TODO: Load actual game statistics from backend
+                // GET /api/puzzle/results
+
+                // Mock statistics for now
+                const guesses = Math.floor(Math.random() * 8) + 3;
+                document.getElementById("guessCount").textContent = guesses;
+
+                // Calculate efficiency rating
+                let efficiency = "⭐⭐⭐";
+                if (guesses <= 4) efficiency = "⭐⭐⭐⭐⭐";
+                else if (guesses <= 6) efficiency = "⭐⭐⭐⭐";
+                else if (guesses <= 8) efficiency = "⭐⭐⭐";
+                else efficiency = "⭐⭐";
+
+                document.getElementById("efficiency").textContent = efficiency;
+
+                // Update share text
+                const shareText = `I solved today's Turing Machine puzzle in ${guesses} guesses!`;
+                document.getElementById("shareText").textContent = shareText;
+            }
+
+            function displayRandomMessage() {
+                const randomMessage =
+                    congratsMessages[
+                        Math.floor(Math.random() * congratsMessages.length)
+                    ];
+                document.getElementById("congratsMessage").textContent =
+                    `"${randomMessage}"`;
+            }
+
+            function createConfetti() {
+                const colors = [
+                    "#f44336",
+                    "#e91e63",
+                    "#9c27b0",
+                    "#673ab7",
+                    "#3f51b5",
+                    "#2196f3",
+                    "#03a9f4",
+                    "#00bcd4",
+                    "#009688",
+                    "#4caf50",
+                    "#8bc34a",
+                    "#cddc39",
+                    "#ffeb3b",
+                    "#ffc107",
+                    "#ff9800",
+                    "#ff5722",
+                ];
+
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement("div");
+                        confetti.className = "confetti";
+                        confetti.style.left = Math.random() * 100 + "vw";
+                        confetti.style.backgroundColor =
+                            colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animation = `confettiFall ${Math.random() * 3 + 2}s linear ${Math.random() * 2}s forwards`;
+                        document.body.appendChild(confetti);
+
+                        setTimeout(() => confetti.remove(), 5000);
+                    }, i * 30);
+                }
+            }
+
+            function copyShareText() {
+                const shareText =
+                    document.getElementById("shareText").textContent;
+                navigator.clipboard
+                    .writeText(shareText)
+                    .then(() => {
+                        const originalText = shareText;
+                        document.getElementById("shareText").textContent =
+                            "Copied to clipboard!";
+                        setTimeout(() => {
+                            document.getElementById("shareText").textContent =
+                                originalText;
+                        }, 2000);
+                    })
+                    .catch((err) => {
+                        alert("Could not copy text. Please copy manually.");
+                    });
+            }
+
+            function playAgain() {
+                window.location.href = "welcome";
+            }
+
+            function goHome() {
+                window.location.href = "welcome";
+            }
+        </script>
+    </body>
+</html>

@@ -43,15 +43,15 @@ func SetupRouter() *gin.Engine {
 	// Setup server-side session store for puzzles
 	router.Use(SetupSessionStoreInMem())
 
-	// Load HTML templates from the html directory
-	router.LoadHTMLGlob("html/*.html")
+	// Load HTML templates from the src directory
+	router.LoadHTMLGlob("src/*.html")
+
+	// Serve static files (CSS)
+	router.Static("/static", "./src")
 
 	// HTML
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
-	})
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(200, "welcome.html", nil)
 	})
 	router.GET("/welcome", func(c *gin.Context) {
 		c.HTML(200, "welcome.html", nil)
@@ -67,6 +67,9 @@ func SetupRouter() *gin.Engine {
 	})
 	router.GET("/success", func(c *gin.Context) {
 		c.HTML(200, "success.html", nil)
+	})
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(200, "welcome.html", nil)
 	})
 
 	// puzzle data management

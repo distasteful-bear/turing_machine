@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Final Answer - Turing Machine</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#667eea] to-[#764ba2] min-h-screen flex justify-center items-center p-5"
+    >
+        <div
+            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+        >
+            <h1 class="text-[#333] text-center mb-4 text-3xl font-bold">
+                Submit Your Final Answer
+            </h1>
+            <p class="text-center text-[#666] mb-7 text-lg">
+                Ready to solve the puzzle?
+            </p>
+
+            <div
+                class="bg-[#fff3cd] border-2 border-[#ffc107] rounded-lg p-5 mb-7 text-center"
+            >
+                <h2 class="text-[#f57c00] mb-2.5 text-xl font-bold">
+                    Final Submission
+                </h2>
+                <p class="text-[#666] leading-relaxed">
+                    This is your final answer! Make sure you've deduced the
+                    correct code from the verifier results. You only get one
+                    chance!
+                </p>
+            </div>
+
+            <div class="bg-[#f8f9fa] p-5 rounded-lg mb-7">
+                <h3 class="text-[#667eea] mb-4 text-center text-xl font-bold">
+                    Your Progress
+                </h3>
+                <div
+                    class="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 mb-4"
+                >
+                    <div class="text-center p-4 bg-white rounded-lg">
+                        <div
+                            class="text-4xl font-bold text-[#667eea]"
+                            id="guessCount"
+                        >
+                            0
+                        </div>
+                        <div class="text-sm text-[#666] mt-1">Guesses Made</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-7">
+                <h2 class="text-[#333] mb-5 text-center text-xl font-bold">
+                    Enter the Secret Code
+                </h2>
+
+                <div
+                    class="hidden bg-[#ffebee] border-l-4 border-[#f44336] p-4 my-5 rounded text-[#c62828] animate-shake"
+                    id="errorMessage"
+                >
+                    Please enter three digits, each between 1 and 5
+                </div>
+
+                <div class="flex justify-center gap-4 mb-7">
+                    <div class="text-center">
+                        <div class="text-sm text-[#2196f3] mb-1.5 font-bold">
+                            BLUE (1st)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-[100px] h-[100px] text-5xl text-center border-4 border-[#2196f3] rounded-2xl font-bold transition-all duration-300 bg-white focus:outline-none focus:scale-[1.08] focus:shadow-[0_8px_25px_rgba(102,126,234,0.3)]"
+                            id="digit1"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                            autofocus
+                        />
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-[#ffc107] mb-1.5 font-bold">
+                            YELLOW (2nd)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-[100px] h-[100px] text-5xl text-center border-4 border-[#ffc107] rounded-2xl font-bold transition-all duration-300 bg-white focus:outline-none focus:scale-[1.08] focus:shadow-[0_8px_25px_rgba(102,126,234,0.3)]"
+                            id="digit2"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                    <div class="text-center">
+                        <div class="text-sm text-[#9c27b0] mb-1.5 font-bold">
+                            PURPLE (3rd)
+                        </div>
+                        <input
+                            type="number"
+                            class="digit-input w-[100px] h-[100px] text-5xl text-center border-4 border-[#9c27b0] rounded-2xl font-bold transition-all duration-300 bg-white focus:outline-none focus:scale-[1.08] focus:shadow-[0_8px_25px_rgba(102,126,234,0.3)]"
+                            id="digit3"
+                            min="1"
+                            max="5"
+                            maxlength="1"
+                            placeholder="?"
+                        />
+                    </div>
+                </div>
+
+                <div
+                    class="bg-[#e3f2fd] border-2 border-[#2196f3] rounded-lg p-5 mb-5"
+                >
+                    <label
+                        class="flex items-center gap-2.5 cursor-pointer text-base text-[#333]"
+                    >
+                        <input
+                            type="checkbox"
+                            id="confirmCheck"
+                            class="w-5 h-5 cursor-pointer"
+                        />
+                        I am confident this is the correct answer
+                    </label>
+                </div>
+
+                <div
+                    class="bg-[#fff9e6] border-l-4 border-[#ffd54f] p-4 my-5 rounded text-[0.95em] text-[#666]"
+                >
+                    <strong>Double-check:</strong> Review all your previous
+                    guesses and verifier results. Make sure every constraint is
+                    satisfied by your answer!
+                </div>
+
+                <div
+                    class="hidden text-center text-[#667eea] font-bold mt-5"
+                    id="loading"
+                >
+                    <span
+                        class="inline-block w-5 h-5 border-[3px] border-[rgba(102,126,234,0.3)] border-t-[#667eea] rounded-full animate-spin mr-2.5"
+                    ></span>
+                    Checking your answer...
+                </div>
+
+                <div class="flex justify-center gap-4 flex-wrap">
+                    <button
+                        class="py-[18px] px-[45px] text-xl font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#4caf50] to-[#45a049] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        onclick="submitFinalAnswer()"
+                        id="submitBtn"
+                        disabled
+                    >
+                        Submit Final Answer
+                    </button>
+                    <button
+                        class="py-4 px-9 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#757575] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        onclick="goBack()"
+                    >
+                        Back to Guessing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Load stats from previous guesses
+            window.onload = function () {
+                setupInputHandlers();
+                loadStats();
+                updateSubmitButton();
+            };
+
+            function setupInputHandlers() {
+                const inputs = [
+                    document.getElementById("digit1"),
+                    document.getElementById("digit2"),
+                    document.getElementById("digit3"),
+                ];
+
+                inputs.forEach((input, index) => {
+                    input.addEventListener("input", function (e) {
+                        // Limit to 1 digit
+                        if (this.value.length > 1) {
+                            this.value = this.value.slice(0, 1);
+                        }
+
+                        // Validate range
+                        const val = parseInt(this.value);
+                        if (val < 1 || val > 5) {
+                            this.value = "";
+                        }
+
+                        // Auto-advance to next input
+                        if (this.value && index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+                    });
+
+                    // Allow Enter to submit (if confirmed)
+                    input.addEventListener("keypress", function (e) {
+                        if (
+                            e.key === "Enter" &&
+                            document.getElementById("confirmCheck").checked
+                        ) {
+                            submitFinalAnswer();
+                        }
+                    });
+                });
+
+                // Update button state when checkbox changes
+                document
+                    .getElementById("confirmCheck")
+                    .addEventListener("change", updateSubmitButton);
+            }
+
+            function loadStats() {
+                // TODO: Load actual game statistics
+                // GET /api/puzzle/stats
+
+                guessCount = sessionStorage.getItem("guessCount");
+                if (guessCount !== null) {
+                    document.getElementById("guessCount").textContent =
+                        guessCount;
+                }
+            }
+
+            function updateSubmitButton() {
+                const btn = document.getElementById("submitBtn");
+                const isConfirmed =
+                    document.getElementById("confirmCheck").checked;
+                btn.disabled = !isConfirmed;
+            }
+
+            function submitFinalAnswer() {
+                const digit1 = document.getElementById("digit1").value;
+                const digit2 = document.getElementById("digit2").value;
+                const digit3 = document.getElementById("digit3").value;
+
+                // Validate input
+                if (!digit1 || !digit2 || !digit3) {
+                    showError("Please enter all three digits");
+                    return;
+                }
+
+                const answer = `${digit1}${digit2}${digit3}`;
+
+                // Validate each digit is 1-5
+                if (!/^[1-5]{3}$/.test(answer)) {
+                    showError("Each digit must be between 1 and 5");
+                    return;
+                }
+
+                // Check confirmation
+                if (!document.getElementById("confirmCheck").checked) {
+                    showError(
+                        "Please confirm you are confident in your answer",
+                    );
+                    return;
+                }
+
+                // Show loading
+                document.getElementById("loading").classList.remove("hidden");
+                document.getElementById("loading").classList.add("block");
+                document.getElementById("submitBtn").disabled = true;
+
+                axios
+                    .get(`/check_final?guess=${answer}`)
+                    .then((response) => {
+                        const results = response.data;
+                        const successful = results.status === "success";
+                        if (successful) {
+                            window.location.href = "success?answer=" + answer;
+                        } else {
+                            window.location.href = "failure?answer=" + answer;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        showError("Failed to send guess");
+                    });
+            }
+
+            function showError(message) {
+                const errorEl = document.getElementById("errorMessage");
+                errorEl.textContent = message;
+                errorEl.classList.remove("hidden");
+                errorEl.classList.add("block", "animate-shake");
+
+                setTimeout(() => {
+                    errorEl.classList.add("hidden");
+                    errorEl.classList.remove("block", "animate-shake");
+                }, 3000);
+            }
+
+            function goBack() {
+                if (confirm("Go back to continue guessing?")) {
+                    window.location.href = "guess";
+                }
+            }
+        </script>
+    </body>
+</html>

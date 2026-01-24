@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* Google Fonts - JetBrains Mono */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+/* Custom theme configuration */
+@theme {
+    --font-family-mono: "JetBrains Mono", monospace;
+
+    /* Custom colors */
+    --color-primary-start: #667eea;
+    --color-primary-end: #764ba2;
+    --color-success-start: #4caf50;
+    --color-success-end: #45a049;
+    --color-failure-start: #f44336;
+    --color-failure-end: #e91e63;
+
+    /* Custom animations */
+    --animate-fade-in: fade-in 0.6s ease-out;
+    --animate-shake: shake 0.5s;
+    --animate-bounce-slow: bounce 1s ease-in-out infinite;
+    --animate-celebration: celebration 0.8s ease-out;
+    --animate-slide-in: slide-in 0.6s ease-out;
+    --animate-sway: sway 2s ease-in-out infinite;
+    --animate-pop-in: pop-in 0.5s ease-out backwards;
+    --animate-pop-in-1: pop-in 0.5s ease-out 0.2s backwards;
+    --animate-pop-in-2: pop-in 0.5s ease-out 0.4s backwards;
+    --animate-pop-in-3: pop-in 0.5s ease-out 0.6s backwards;
+    --animate-confetti-fall: confetti-fall 3s linear forwards;
+
+    /* Keyframes */
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes shake {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        25% {
+            transform: translateX(-10px);
+        }
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    @keyframes celebration {
+        0% {
+            opacity: 0;
+            transform: scale(0.8) translateY(50px);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes slide-in {
+        0% {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes sway {
+        0%,
+        100% {
+            transform: rotate(-5deg);
+        }
+        50% {
+            transform: rotate(5deg);
+        }
+    }
+
+    @keyframes pop-in {
+        0% {
+            opacity: 0;
+            transform: scale(0);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes confetti-fall {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+}
+
+/* Number input spinner removal */
+.digit-input::-webkit-inner-spin-button,
+.digit-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.digit-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Confetti positioning */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 1;
+}
