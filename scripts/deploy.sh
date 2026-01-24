@@ -1,3 +1,5 @@
+./scripts/build
+
 
 # Deploy to Cloud Ru
 gcloud run deploy turing-machine \
