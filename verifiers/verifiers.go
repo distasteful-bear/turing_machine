@@ -18,7 +18,7 @@ type Puzzle struct {
 
 type ResponseSet [125]bool
 
-type SolutionVerifier func(Solution) VerifierBranch
+type SolutionOnlyVerifier func(Solution) VerifierBranch
 type ColorVerifier func(color, Solution) VerifierBranch
 type NumberVerifier func(rune, Solution) VerifierBranch
 type ColorColorVerifier func(color, color, Solution) VerifierBranch
@@ -150,51 +150,46 @@ func getNumFromColor(c color, sol Solution) int {
 	}
 }
 
-func smallestColor(sol Solution) bool {
+func smallestColor(sol Solution) color {
 	blue := 0
 	yellow := 1
 	purple := 2
 	if sol.Display[blue] < sol.Display[yellow] &&
-			sol.Display[blue] < sol.Display[purple] {
-				return "blue"
-			}
-	case "yellow":
-		return sol.Display[1] < sol.Display[getNumFromColor("blue", sol)] &&
-			sol.Display[1] < sol.Display[getNumFromColor("purple", sol)]
-	case "purple":
-		return sol.Display[2] < sol.Display[getNumFromColor("blue", sol)] &&
-			sol.Display[2] < sol.Display[getNumFromColor("yellow", sol)]
-	default:
-		panic("invalid color")
+		sol.Display[blue] < sol.Display[purple] {
+		return "blue"
 	}
+	if sol.Display[yellow] < sol.Display[blue] &&
+		sol.Display[yellow] < sol.Display[purple] {
+		return "yellow"
+	}
+	if sol.Display[purple] < sol.Display[blue] &&
+		sol.Display[purple] < sol.Display[yellow] {
+		return "purple"
+	}
+	return "invalid"
 }
 func V_ColorIsSmallest(c color, sol Solution) VerifierBranch {
-	solAns := isColorSmallest(c, sol)
+	solSmallestColor := smallestColor(sol)
 	switch c {
 	case "blue":
 		return VerifierBranch{
-			Desc: "is blue less than or equal to all other numbers",
+			Desc: "is blue less than all other numbers",
 			VerifierFunc: func(sol Solution) bool {
-				blueIdx := 0
-				return solAns == isColorSmallest(sol)
+				return (solSmallestColor == "blue") == (smallestColor(sol) == "blue")
 			},
 		}
 	case "yellow":
 		return VerifierBranch{
-			Desc: "is yellow less than or equal to all other numbers",
+			Desc: "is yellow less than all other numbers",
 			VerifierFunc: func(sol Solution) bool {
-				yellowIdx := 1
-				return sol.Display[yellowIdx] < sol.Display[getNumFromColor("blue", sol)] &&
-					sol.Display[yellowIdx] < sol.Display[getNumFromColor("purple", sol)]
+				return (solSmallestColor == "yellow") == (smallestColor(sol) == "yellow")
 			},
 		}
 	case "purple":
 		return VerifierBranch{
-			Desc: "is purple less than or equal to all other numbers",
+			Desc: "is purple less than all other numbers",
 			VerifierFunc: func(sol Solution) bool {
-				purpleIdx := 2
-				return sol.Display[purpleIdx] < sol.Display[getNumFromColor("blue", sol)] &&
-					sol.Display[purpleIdx] < sol.Display[getNumFromColor("yellow", sol)]
+				return (solSmallestColor == "purple") == (smallestColor(sol) == "purple")
 			},
 		}
 	default:
@@ -211,7 +206,7 @@ func V_ColorGreaterThanColor(c1 color, c2 color, sol Solution) VerifierBranch {
 }
 
 type VerifierIterators struct {
-	Solution    []SolutionVerifier
+	Solution    []SolutionOnlyVerifier
 	Color       []ColorVerifier
 	Number      []NumberVerifier
 	ColorColor  []ColorColorVerifier
@@ -220,7 +215,7 @@ type VerifierIterators struct {
 
 func GetAllVerifiers() VerifierIterators {
 	return VerifierIterators{
-		Solution:    []SolutionVerifier{V_NumberRepeatsItself, V_SumOfAllNumbersOddEven},
+		Solution:    []SolutionOnlyVerifier{V_NumberRepeatsItself, V_SumOfAllNumbersOddEven},
 		Color:       []ColorVerifier{V_ColorIsSmallest},
 		Number:      []NumberVerifier{V_NumberOfNInSol},
 		ColorColor:  []ColorColorVerifier{},
