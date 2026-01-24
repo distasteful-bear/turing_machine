@@ -1,4 +1,4 @@
-./scripts/build
+./scripts/build.sh
 
 
 # Deploy to Cloud Ru
