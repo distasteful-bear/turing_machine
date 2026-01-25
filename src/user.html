@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Turing Machine - Profile</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-linear-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
+    >
+        <!-- Logout button in upper corner -->
+        <a
+            href="/logout"
+            class="fixed top-5 right-5 py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+        >
+            Logout
+        </a>
+
+        <div
+            class="max-w-[600px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+        >
+            <!-- Profile Header -->
+            <div class="flex flex-col items-center mb-7">
+                <img
+                    class="w-24 h-24 rounded-full border-4 border-[#6b8aa3] mb-4"
+                    src="{{ .Picture }}"
+                    alt="Profile picture"
+                />
+                <h1 class="text-[#333] text-center text-3xl font-bold">
+                    Welcome, {{ .Nickname }}
+                </h1>
+            </div>
+
+            <!-- Stats Section -->
+            <h2 class="text-[#6b8aa3] mt-7 mb-4 text-2xl font-bold text-center">
+                Your Stats
+            </h2>
+
+            <div class="grid grid-cols-2 gap-4 my-5">
+                <!-- Games Played -->
+                <div
+                    class="bg-white border-2 border-[#6b8aa3] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(107,138,163,0.3)]"
+                >
+                    <h3 class="text-[#6b8aa3] text-base mb-2 font-bold">
+                        Games Played
+                    </h3>
+                    <p class="text-4xl font-bold text-[#333]">
+                        {{ .GamesPlayed }}
+                    </p>
+                </div>
+
+                <!-- Leaderboard Rank -->
+                <div
+                    class="bg-white border-2 border-[#6b8aa3] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(107,138,163,0.3)]"
+                >
+                    <h3 class="text-[#6b8aa3] text-base mb-2 font-bold">
+                        Leaderboard Rank
+                    </h3>
+                    <p class="text-4xl font-bold text-[#333]">
+                        {{ if eq .LeaderboardRank 0 }}--{{ else }}{{
+                        .LeaderboardRank }}{{ end }}
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="bg-[#e3f2fd] border-l-4 border-[#2196f3] p-4 my-5 rounded text-[0.95em]"
+            >
+                <strong>Tip:</strong> Play more games to climb the leaderboard
+                and improve your ranking!
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mt-7">
+                <a
+                    href="/"
+                    class="flex-1 block text-center py-4 px-7 text-lg font-bold text-[#6b8aa3] bg-white border-2 border-[#6b8aa3] rounded-full cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#f0f4f8] no-underline"
+                >
+                    Home
+                </a>
+                <a
+                    href="/guess"
+                    class="flex-1 block text-center py-4 px-7 text-lg font-bold text-white bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(107,138,163,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(107,138,163,0.6)] no-underline"
+                >
+                    Play Game
+                </a>
+            </div>
+        </div>
+    </body>
+</html>

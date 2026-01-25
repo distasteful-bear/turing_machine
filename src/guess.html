@@ -8,7 +8,7 @@
         <title>Make a Guess - Turing Machine</title>
     </head>
     <body
-        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#38a5ff] to-[#0262b0] min-h-screen flex justify-center items-center p-5"
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
     >
         <div
             class="max-w-[900px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
@@ -20,7 +20,7 @@
             <div class="flex justify-around mb-5 flex-wrap gap-2.5">
                 <div class="text-center py-2.5 px-5 bg-[#f8f9fa] rounded-lg">
                     <div
-                        class="text-2xl font-bold text-[#38a5ff]"
+                        class="text-2xl font-bold text-[#6b8aa3]"
                         id="guessCount"
                     >
                         0
@@ -29,7 +29,7 @@
                 </div>
                 <div class="text-center py-2.5 px-5 bg-[#f8f9fa] rounded-lg">
                     <div
-                        class="text-2xl font-bold text-[#38a5ff]"
+                        class="text-2xl font-bold text-[#6b8aa3]"
                         id="possibilities"
                     >
                         125
@@ -39,15 +39,15 @@
             </div>
 
             <div class="bg-[#f8f9fa] p-5 rounded-lg mb-7">
-                <h2 class="text-[#38a5ff] mb-4 text-xl font-bold">
+                <h2 class="text-[#6b8aa3] mb-4 text-xl font-bold">
                     Verifiers for This Puzzle
                 </h2>
                 <div class="grid gap-2.5" id="verifierList">
                     <div
-                        class="bg-white p-4 rounded-lg border-l-4 border-[#38a5ff] flex items-center gap-4"
+                        class="bg-white p-4 rounded-lg border-l-4 border-[#6b8aa3] flex items-center gap-4"
                     >
                         <div
-                            class="bg-[#38a5ff] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                            class="bg-[#6b8aa3] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0"
                         >
                             A
                         </div>
@@ -129,7 +129,7 @@
 
                 <div class="flex justify-center gap-4 flex-wrap">
                     <button
-                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#38a5ff] to-[#0262b0] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
                         onclick="submitGuess()"
                     >
                         Check This Guess
@@ -233,8 +233,8 @@
                 verifierList.innerHTML = verifiers
                     .map(
                         (v) => `
-                          <div class="bg-white p-4 rounded-lg border-l-4 border-[#38a5ff] flex items-center gap-4">
-                              <div class="bg-[#38a5ff] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0">${letters[v["id"]] || String(v["id"] + 1)}</div>
+                          <div class="bg-white p-4 rounded-lg border-l-4 border-[#6b8aa3] flex items-center gap-4">
+                              <div class="bg-[#6b8aa3] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0">${letters[v["id"]] || String(v["id"] + 1)}</div>
                               <div class="flex-1 text-[#333]">${v.description}</div>
                               <span class="py-1.5 px-4 rounded font-bold min-w-[70px] text-center ${getResultClass(v.result)}" id="result-${v.id}">
                                   ${getResultText(v.result)}

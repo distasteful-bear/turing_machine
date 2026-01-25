@@ -1,8 +1,15 @@
 package api
 
 import (
+	"distasteful-bear/turing_machine/api/authenticator"
+	"distasteful-bear/turing_machine/api/callback"
+	"distasteful-bear/turing_machine/api/login"
+	"distasteful-bear/turing_machine/api/logout"
+	"distasteful-bear/turing_machine/api/middleware"
+	"distasteful-bear/turing_machine/api/user"
 	"distasteful-bear/turing_machine/utils"
 	"distasteful-bear/turing_machine/verifiers"
+	"encoding/gob"
 	"fmt"
 	"time"
 
@@ -37,8 +44,13 @@ func SetupSessionStoreInMem() gin.HandlerFunc {
 func SetupRouter() *gin.Engine {
 	// Initialize Gin router
 	router := gin.Default()
-	store := cookie.NewStore([]byte("03g3iq2n4fp2wo23n1pnic9f0422fjuP"))
-	router.Use(sessions.Sessions("globalsession", store))
+
+	// To store custom types in our cookies,
+	// we must first register them using gob.Register
+	gob.Register(map[string]interface{}{})
+
+	store := cookie.NewStore([]byte("secret"))
+	router.Use(sessions.Sessions("auth-session", store))
 
 	// Setup server-side session store for puzzles
 	router.Use(SetupSessionStoreInMem())
@@ -68,12 +80,20 @@ func SetupRouter() *gin.Engine {
 	router.GET("/success", func(c *gin.Context) {
 		c.HTML(200, "success.html", nil)
 	})
-	router.GET("/login", func(c *gin.Context) {
-		c.HTML(200, "login.html", nil)
-	})
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "welcome.html", nil)
 	})
+
+	// auth routes
+	auth, err := authenticator.New()
+	if err != nil {
+		fmt.Print("Error creating authenticator session.")
+		panic(err)
+	}
+	router.GET("/login", login.Handler(auth))
+	router.GET("/callback", callback.Handler(auth))
+	router.GET("/logout", logout.Handler)
+	router.GET("/user", middleware.IsAuthenticated, user.Handler)
 
 	// puzzle data management
 	router.GET("/setup_session", func(c *gin.Context) {
@@ -117,7 +137,6 @@ func SetupRouter() *gin.Engine {
 		fmt.Println("Puzzle stored with ID:", sessionID) // Testing
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
-
 	router.GET("/check_guess", func(c *gin.Context) {
 
 		session := sessions.Default(c)

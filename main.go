@@ -5,11 +5,18 @@ import (
 	"distasteful-bear/turing_machine/run"
 	"distasteful-bear/turing_machine/verifiers"
 	"fmt"
+	"log"
 	"os"
 	"slices"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file for Auth0 configuration
+	if err := godotenv.Load("api/.env"); err != nil {
+		log.Println("Warning: Could not load api/.env file:", err)
+	}
 
 	fmt.Println("Setting up Game...")
 	args := os.Args[1:]
