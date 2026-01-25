@@ -22,11 +22,20 @@
         >
             <!-- Profile Header -->
             <div class="flex flex-col items-center mb-7">
+                {{ if .Picture }}
                 <img
                     class="w-24 h-24 rounded-full border-4 border-[#6b8aa3] mb-4"
                     src="{{ .Picture }}"
                     alt="Profile picture"
                 />
+                {{ else }}
+                <div
+                    class="w-24 h-24 rounded-full border-4 border-[#6b8aa3] mb-4 bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] flex items-center justify-center text-white text-4xl font-bold"
+                >
+                    {{ if .Nickname }}{{ index .Nickname 0 }}{{ else }}?{{ end
+                    }}
+                </div>
+                {{ end }}
                 <h1 class="text-[#333] text-center text-3xl font-bold">
                     Welcome, {{ .Nickname }}
                 </h1>
