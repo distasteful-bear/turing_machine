@@ -192,6 +192,7 @@ func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) e
 			{Path: "leaderboard_rank", Value: 0},
 		})
 	}
+	bulkWriter.Flush()
 
 	// Set new ranks for top users
 	for rank, ru := range rankedUsers {
