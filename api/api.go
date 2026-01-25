@@ -144,8 +144,9 @@ func SetupRouter() *gin.Engine {
 		// Store puzzle in server-side memory
 		store.ActivePuzzles[sessionID] = puzzle
 
-		// Store only the session ID in the session cookie
+		// Store only the session ID in the session cookie and reset guess count
 		session.Set("puzzle_id", sessionID)
+		session.Set("guess_count", 0)
 		session.Save()
 
 		type verSummary struct {
