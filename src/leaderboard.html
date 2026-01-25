@@ -8,35 +8,41 @@
         <title>Leaderboard - Turing Machine</title>
     </head>
     <body
-        class="font-['JetBrains_Mono',monospace] bg-linear-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
+        class="font-['JetBrains_Mono',monospace] bg-linear-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex flex-col sm:p-5 p-2"
     >
-        <!-- Navigation buttons in upper corner -->
-        <div class="fixed top-5 right-5 flex flex-col gap-3 items-end z-20">
-            <a
-                href="/"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+        <!-- Top Navigation Bar -->
+        <div
+            class="fixed top-0 left-0 right-0 z-20 bg-[#6b8aa3]/30 backdrop-blur-md border-b border-white/20"
+        >
+            <div
+                class="max-w-[1200px] mx-auto px-4 py-3 flex justify-between items-center gap-3 flex-wrap"
             >
-                Home
-            </a>
-            {{ if .IsLoggedIn }}
-            <a
-                href="/user"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                Profile
-            </a>
-            {{ else }}
-            <a
-                href="/login"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                Login
-            </a>
-            {{ end }}
+                <div class="text-white font-bold text-lg">Turing Machine</div>
+                <div class="flex gap-2 items-center flex-wrap">
+                    <a
+                        href="/"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                        >Home</a
+                    >
+                    {{ if .IsLoggedIn }}
+                    <a
+                        href="/user"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                        >Profile</a
+                    >
+                    {{ else }}
+                    <a
+                        href="/login"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                        >Login</a
+                    >
+                    {{ end }}
+                </div>
+            </div>
         </div>
 
         <div
-            class="max-w-[800px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+            class="max-w-[800px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-10 p-4 animate-fade-in mt-20 mx-auto"
         >
             <h1 class="text-[#333] text-center mb-2.5 text-4xl font-bold">
                 Leaderboard

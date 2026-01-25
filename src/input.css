@@ -129,3 +129,21 @@
     height: 10px;
     z-index: 1;
 }
+
+/* Mobile responsive padding */
+@media (max-width: 640px) {
+    .mobile-reduced-padding {
+        padding: 1.25rem !important;
+    }
+    .mobile-reduced-p-x {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    .mobile-reduced-p-y {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    .mobile-reduced-gap {
+        gap: 0.5rem !important;
+    }
+}

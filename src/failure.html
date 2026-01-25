@@ -13,44 +13,52 @@
         <title>Try Again - Turing Machine</title>
     </head>
     <body
-        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#f44336] to-[#e91e63] min-h-screen flex justify-center items-center p-5"
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#f44336] to-[#e91e63] min-h-screen flex flex-col sm:p-5 p-2"
     >
-        <!-- Navigation buttons in upper corner -->
+        <!-- Top Navigation Bar -->
         <div
-            id="authSection"
-            class="fixed top-5 right-5 z-20 flex flex-col gap-3 items-end"
+            class="fixed top-0 left-0 right-0 z-20 bg-[#6b8aa3]/30 backdrop-blur-md border-b border-white/20"
         >
-            <a
-                href="/leaderboard"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            <div
+                class="max-w-[1200px] mx-auto px-4 py-3 flex justify-between items-center gap-3 flex-wrap"
             >
-                Leaderboard
-            </a>
-            <a
-                id="loginBtn"
-                href="login"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                Login
-            </a>
-            <a
-                id="userBtn"
-                href="user"
-                class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                <img
-                    id="userPicture"
-                    src=""
-                    alt=""
-                    width="24"
-                    height="24"
-                    class="w-6 h-6 rounded-full object-cover"
-                />
-                <span id="userNickname"></span>
-            </a>
+                <div class="text-white font-bold text-lg">Turing Machine</div>
+                <div id="authSection" class="flex gap-2 items-center flex-wrap">
+                    <a
+                        href="/leaderboard"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        Leaderboard
+                    </a>
+                    <a
+                        id="loginBtn"
+                        href="login"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        Login
+                    </a>
+                    <a
+                        id="userBtn"
+                        href="user"
+                        class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        <img
+                            id="userPicture"
+                            src=""
+                            alt=""
+                            width="24"
+                            height="24"
+                            class="w-6 h-6 rounded-full object-cover"
+                        />
+                        <span id="userNickname"></span>
+                    </a>
+                </div>
+            </div>
         </div>
+
+        <!-- Main Content -->
         <div
-            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] py-12 px-10 text-center animate-slide-in"
+            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:py-12 py-8 sm:px-10 px-4 text-center animate-slide-in mt-20 mx-auto"
         >
             <div class="text-[100px] mb-5 animate-sway">😔</div>
             <h1 class="text-[#f44336] text-4xl mb-4 font-bold">

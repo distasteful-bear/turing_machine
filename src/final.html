@@ -8,44 +8,51 @@
         <title>Final Answer - Turing Machine</title>
     </head>
     <body
-        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex flex-col sm:p-5 p-2"
     >
-        <!-- Navigation buttons in upper corner -->
+        <!-- Top Navigation Bar -->
         <div
-            id="authSection"
-            class="fixed top-5 right-5 z-20 flex flex-col gap-3 items-end"
+            class="fixed top-0 left-0 right-0 z-20 bg-[#6b8aa3]/30 backdrop-blur-md border-b border-white/20"
         >
-            <a
-                href="/leaderboard"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            <div
+                class="max-w-[1200px] mx-auto px-4 py-3 flex justify-between items-center gap-3 flex-wrap"
             >
-                Leaderboard
-            </a>
-            <a
-                id="loginBtn"
-                href="login"
-                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                Login
-            </a>
-            <a
-                id="userBtn"
-                href="user"
-                class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
-            >
-                <img
-                    id="userPicture"
-                    src=""
-                    alt=""
-                    width="24"
-                    height="24"
-                    class="w-6 h-6 rounded-full object-cover"
-                />
-                <span id="userNickname"></span>
-            </a>
+                <div class="text-white font-bold text-lg">Turing Machine</div>
+                <div id="authSection" class="flex gap-2 items-center flex-wrap">
+                    <a
+                        href="/leaderboard"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        Leaderboard
+                    </a>
+                    <a
+                        id="loginBtn"
+                        href="login"
+                        class="py-2 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        Login
+                    </a>
+                    <a
+                        id="userBtn"
+                        href="user"
+                        class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 no-underline"
+                    >
+                        <img
+                            id="userPicture"
+                            src=""
+                            alt=""
+                            width="24"
+                            height="24"
+                            class="w-6 h-6 rounded-full object-cover"
+                        />
+                        <span id="userNickname"></span>
+                    </a>
+                </div>
+            </div>
         </div>
+
         <div
-            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+            class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-10 p-4 animate-fade-in mt-20 mx-auto"
         >
             <h1 class="text-[#333] text-center mb-4 text-3xl font-bold">
                 Submit Your Final Answer
@@ -185,12 +192,6 @@
                         disabled
                     >
                         Submit Final Answer
-                    </button>
-                    <button
-                        class="py-4 px-9 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#757575] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
-                        onclick="goBack()"
-                    >
-                        Back to Guessing
                     </button>
                 </div>
             </div>

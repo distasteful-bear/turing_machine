@@ -273,17 +273,20 @@ func SetupRouter() *gin.Engine {
 			return
 		}
 
-		// Get guess count from session
+		// Get guess count from session and increment for final submission
 		guessCount := session.Get("guess_count")
 		if guessCount == nil {
 			guessCount = 0
 		}
 
+		// Convert rune array to string for JSON response
+		solutionStr := string(puzzle.Sol.Display[:])
+
 		if proposedSolution.Display == puzzle.Sol.Display {
-			c.JSON(200, gin.H{"status": "success", "guess_count": guessCount, "solution": puzzle.Sol.Display})
+			c.JSON(200, gin.H{"status": "success", "guess_count": guessCount, "solution": solutionStr})
 			return
 		} else {
-			c.JSON(200, gin.H{"status": "failure", "guess_count": guessCount, "solution": puzzle.Sol.Display})
+			c.JSON(200, gin.H{"status": "failure", "guess_count": guessCount, "solution": solutionStr})
 			return
 		}
 	})
