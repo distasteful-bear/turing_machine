@@ -68,6 +68,9 @@ func SetupRouter() *gin.Engine {
 	router.GET("/success", func(c *gin.Context) {
 		c.HTML(200, "success.html", nil)
 	})
+	router.GET("/login", func(c *gin.Context) {
+		c.HTML(200, "login.html", nil)
+	})
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "welcome.html", nil)
 	})
