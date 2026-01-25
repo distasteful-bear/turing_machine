@@ -274,11 +274,11 @@
                 document.getElementById("guessCount").textContent = guesses;
 
                 // Calculate efficiency rating
-                let efficiency = "⭐⭐⭐";
-                if (guesses <= 4) efficiency = "⭐⭐⭐⭐⭐";
-                else if (guesses <= 6) efficiency = "⭐⭐⭐⭐";
-                else if (guesses <= 8) efficiency = "⭐⭐⭐";
-                else efficiency = "⭐⭐";
+                let efficiency = "⭐";
+                if (guesses <= 2) efficiency = "⭐⭐⭐";
+                else if (guesses <= 4) efficiency = "⭐⭐";
+                else if (guesses <= 6) efficiency = "⭐";
+                else efficiency = "";
 
                 document.getElementById("efficiency").textContent = efficiency;
 
