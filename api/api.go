@@ -1,8 +1,11 @@
 package api
 
 import (
+	"context"
 	"distasteful-bear/turing_machine/api/authenticator"
 	"distasteful-bear/turing_machine/api/callback"
+	"distasteful-bear/turing_machine/api/db"
+	"distasteful-bear/turing_machine/api/leaderboard"
 	"distasteful-bear/turing_machine/api/login"
 	"distasteful-bear/turing_machine/api/logout"
 	"distasteful-bear/turing_machine/api/middleware"
@@ -11,6 +14,7 @@ import (
 	"distasteful-bear/turing_machine/verifiers"
 	"encoding/gob"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -94,6 +98,30 @@ func SetupRouter() *gin.Engine {
 	router.GET("/callback", callback.Handler(auth))
 	router.GET("/logout", logout.Handler)
 	router.GET("/user", middleware.IsAuthenticated, user.Handler)
+	router.GET("/leaderboard", leaderboard.Handler)
+
+	// Check authentication status
+	router.GET("/auth_status", func(c *gin.Context) {
+		session := sessions.Default(c)
+		profile := session.Get("profile")
+
+		if profile == nil {
+			c.JSON(200, gin.H{"logged_in": false})
+			return
+		}
+
+		profileMap, ok := profile.(map[string]interface{})
+		if !ok {
+			c.JSON(200, gin.H{"logged_in": false})
+			return
+		}
+
+		c.JSON(200, gin.H{
+			"logged_in": true,
+			"nickname":  profileMap["nickname"],
+			"picture":   profileMap["picture"],
+		})
+	})
 
 	// puzzle data management
 	router.GET("/setup_session", func(c *gin.Context) {
@@ -173,6 +201,16 @@ func SetupRouter() *gin.Engine {
 			c.JSON(400, gin.H{"error": "error parsing guess"})
 			return
 		}
+
+		// Increment guess count in session
+		guessCount := session.Get("guess_count")
+		if guessCount == nil {
+			guessCount = 0
+		}
+		newGuessCount := guessCount.(int) + 1
+		session.Set("guess_count", newGuessCount)
+		session.Save()
+
 		type verSummary struct {
 			Id          int    `json:"id"`
 			Description string `json:"description"`
@@ -195,7 +233,7 @@ func SetupRouter() *gin.Engine {
 				})
 			}
 		}
-		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
+		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary, "guess_count": newGuessCount})
 	})
 	router.GET("/check_final", func(c *gin.Context) {
 
@@ -234,13 +272,79 @@ func SetupRouter() *gin.Engine {
 			return
 		}
 
+		// Get guess count from session
+		guessCount := session.Get("guess_count")
+		if guessCount == nil {
+			guessCount = 0
+		}
+
 		if proposedSolution.Display == puzzle.Sol.Display {
-			c.JSON(200, gin.H{"status": "success"})
+			c.JSON(200, gin.H{"status": "success", "guess_count": guessCount, "solution": puzzle.Sol.Display})
 			return
 		} else {
-			c.JSON(200, gin.H{"status": "failure"})
+			c.JSON(200, gin.H{"status": "failure", "guess_count": guessCount, "solution": puzzle.Sol.Display})
 			return
 		}
+	})
+
+	// Record game completion for logged-in users
+	router.POST("/record_game", func(c *gin.Context) {
+		session := sessions.Default(c)
+		profile := session.Get("profile")
+
+		// Check if user is logged in
+		if profile == nil {
+			c.JSON(200, gin.H{"status": "ok", "message": "not logged in, stats not recorded"})
+			return
+		}
+
+		profileMap, ok := profile.(map[string]interface{})
+		if !ok {
+			c.JSON(200, gin.H{"status": "ok", "message": "invalid profile, stats not recorded"})
+			return
+		}
+
+		userID, _ := profileMap["sub"].(string)
+		if userID == "" {
+			c.JSON(200, gin.H{"status": "ok", "message": "no user ID, stats not recorded"})
+			return
+		}
+
+		// Parse request body
+		var req struct {
+			Won        bool `json:"won"`
+			GuessCount int  `json:"guess_count"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		// Record to Firestore
+		firestoreCtx := context.Background()
+		client, err := db.GetFirestoreClient(firestoreCtx)
+		if err != nil {
+			log.Printf("Error creating Firestore client: %v", err)
+			c.JSON(500, gin.H{"error": "failed to connect to database"})
+			return
+		}
+		defer client.Close()
+
+		err = db.RecordGameCompletion(firestoreCtx, client, userID, req.Won, req.GuessCount)
+		if err != nil {
+			log.Printf("Error recording game completion: %v", err)
+			c.JSON(500, gin.H{"error": "failed to record game"})
+			return
+		}
+
+		// Recompute leaderboard rankings
+		err = db.ComputeLeaderboardRankings(firestoreCtx, client)
+		if err != nil {
+			log.Printf("Error computing leaderboard rankings: %v", err)
+			// Don't fail the request, just log the error
+		}
+
+		c.JSON(200, gin.H{"status": "success", "message": "game recorded"})
 	})
 
 	return router

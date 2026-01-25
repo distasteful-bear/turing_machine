@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"distasteful-bear/turing_machine/api/db"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -10,12 +11,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// calculateStats computes win rate and average guesses per game
+func calculateStats(gamesPlayed, gamesWon, totalGuesses int) (winRate string, avgGuesses string) {
+	if gamesPlayed == 0 {
+		return "--", "--"
+	}
+	winRateVal := float64(gamesWon) / float64(gamesPlayed) * 100
+	avgGuessesVal := float64(totalGuesses) / float64(gamesPlayed)
+	return fmt.Sprintf("%.0f%%", winRateVal), fmt.Sprintf("%.1f", avgGuessesVal)
+}
+
 // UserPageData contains all data needed to render the user page
 type UserPageData struct {
 	Nickname        string
 	Picture         string
 	GamesPlayed     int
+	GamesWon        int
+	GamesLost       int
+	TotalGuesses    int
 	LeaderboardRank int
+	WinRate         string
+	AvgGuesses      string
 }
 
 // Handler for our logged-in user page.
@@ -44,7 +60,12 @@ func Handler(ctx *gin.Context) {
 			Nickname:        nickname,
 			Picture:         picture,
 			GamesPlayed:     0,
+			GamesWon:        0,
+			GamesLost:       0,
+			TotalGuesses:    0,
 			LeaderboardRank: 0,
+			WinRate:         "--",
+			AvgGuesses:      "--",
 		})
 		return
 	}
@@ -57,15 +78,27 @@ func Handler(ctx *gin.Context) {
 			Nickname:        nickname,
 			Picture:         picture,
 			GamesPlayed:     0,
+			GamesWon:        0,
+			GamesLost:       0,
+			TotalGuesses:    0,
 			LeaderboardRank: 0,
+			WinRate:         "--",
+			AvgGuesses:      "--",
 		})
 		return
 	}
+
+	winRate, avgGuesses := calculateStats(userRecord.GamesPlayed, userRecord.GamesWon, userRecord.TotalGuesses)
 
 	ctx.HTML(http.StatusOK, "user.html", UserPageData{
 		Nickname:        userRecord.Nickname,
 		Picture:         userRecord.Picture,
 		GamesPlayed:     userRecord.GamesPlayed,
+		GamesWon:        userRecord.GamesWon,
+		GamesLost:       userRecord.GamesLost,
+		TotalGuesses:    userRecord.TotalGuesses,
 		LeaderboardRank: userRecord.LeaderboardRank,
+		WinRate:         winRate,
+		AvgGuesses:      avgGuesses,
 	})
 }

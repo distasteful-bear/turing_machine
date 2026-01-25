@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/output.css" />
+        <title>Leaderboard - Turing Machine</title>
+    </head>
+    <body
+        class="font-['JetBrains_Mono',monospace] bg-linear-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
+    >
+        <!-- Navigation buttons in upper corner -->
+        <div class="fixed top-5 right-5 flex flex-col gap-3 items-end z-20">
+            <a
+                href="/"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Home
+            </a>
+            {{ if .IsLoggedIn }}
+            <a
+                href="/user"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Profile
+            </a>
+            {{ else }}
+            <a
+                href="/login"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Login
+            </a>
+            {{ end }}
+        </div>
+
+        <div
+            class="max-w-[800px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
+        >
+            <h1 class="text-[#333] text-center mb-2.5 text-4xl font-bold">
+                Leaderboard
+            </h1>
+            <p class="text-center text-[#666] mb-7 text-lg">Top Players</p>
+
+            {{ if .IsLoggedIn }} {{ if .CurrentUser }}
+            <!-- Current User Stats -->
+            <div
+                class="bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] rounded-lg p-5 mb-7 text-white"
+            >
+                <h2 class="text-white/80 text-lg mb-4 font-bold">Your Stats</h2>
+                <div class="flex items-center gap-4 mb-4">
+                    {{ if .CurrentUser.Picture }}
+                    <img
+                        src="{{ .CurrentUser.Picture }}"
+                        alt=""
+                        width="48"
+                        height="48"
+                        class="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                    />
+                    {{ end }}
+                    <div>
+                        <p class="text-xl font-bold">
+                            {{ .CurrentUser.Nickname }}
+                        </p>
+                        <p class="text-white/70 text-sm">
+                            {{ if eq .CurrentUser.Rank 0 }} Not ranked yet {{
+                            else }} Rank #{{ .CurrentUser.Rank }} {{ end }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-row justify-around text-center">
+                    <div class="bg-white/10 rounded-lg p-3">
+                        <p class="text-2xl font-bold">
+                            {{ .CurrentUser.GamesWon }}
+                        </p>
+                        <p class="text-xs text-white/70">Wins</p>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3">
+                        <p class="text-2xl font-bold">
+                            {{ .CurrentUser.GamesLost }}
+                        </p>
+                        <p class="text-xs text-white/70">Losses</p>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3">
+                        <p class="text-2xl font-bold">
+                            {{ .CurrentUser.WinRate }}
+                        </p>
+                        <p class="text-xs text-white/70">Win Rate</p>
+                    </div>
+                    <div class="bg-white/10 rounded-lg p-3">
+                        <p class="text-2xl font-bold">
+                            {{ .CurrentUser.AvgGuesses }}
+                        </p>
+                        <p class="text-xs text-white/70">Avg Guesses</p>
+                    </div>
+                </div>
+            </div>
+            {{ end }} {{ else }}
+            <!-- Login prompt -->
+            <div
+                class="bg-[#e3f2fd] border-2 border-[#6b8aa3] rounded-lg p-5 mb-7 text-center"
+            >
+                <p class="text-[#666] mb-3">
+                    Login to see your stats and track your ranking!
+                </p>
+                <a
+                    href="/login"
+                    class="inline-block py-2.5 px-6 text-base font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] no-underline"
+                >
+                    Login
+                </a>
+            </div>
+            {{ end }}
+
+            <!-- Top 10 Leaderboard -->
+            <h2 class="text-[#6b8aa3] mt-7 mb-4 text-2xl font-bold">
+                Top 10 Players
+            </h2>
+
+            {{ if .TopUsers }}
+            <div class="space-y-3">
+                {{ range .TopUsers }}
+                <div
+                    class="flex items-center gap-4 p-4 rounded-lg border-2 {{ if .IsCurrentUser }}border-[#4caf50] bg-[#e8f5e9]{{ else }}border-[#e0e0e0] bg-[#f8f9fa]{{ end }} transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_5px_15px_rgba(0,0,0,0.1)]"
+                >
+                    <!-- Rank -->
+                    <div
+                        class="w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg
+                        {{ if eq .Rank 1 }}bg-[#ffd700] text-[#333]{{ else if eq .Rank 2 }}bg-[#c0c0c0] text-[#333]{{ else if eq .Rank 3 }}bg-[#cd7f32] text-white{{ else }}bg-[#6b8aa3] text-white{{ end }}"
+                    >
+                        {{ .Rank }}
+                    </div>
+
+                    <!-- Avatar -->
+                    {{ if .Picture }}
+                    <img
+                        src="{{ .Picture }}"
+                        alt=""
+                        width="40"
+                        height="40"
+                        class="w-10 h-10 rounded-full object-cover"
+                    />
+                    {{ else }}
+                    <div
+                        class="w-10 h-10 rounded-full bg-[#e0e0e0] flex items-center justify-center text-[#666]"
+                    >
+                        ?
+                    </div>
+                    {{ end }}
+
+                    <!-- Name -->
+                    <div class="flex-1">
+                        <p
+                            class="font-bold text-[#333] {{ if .IsCurrentUser }}text-[#4caf50]{{ end }}"
+                        >
+                            {{ .Nickname }} {{ if .IsCurrentUser }}<span
+                                class="text-sm font-normal"
+                                >(You)</span
+                            >{{ end }}
+                        </p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="flex gap-4 text-sm text-[#666]">
+                        <div class="text-center">
+                            <p class="font-bold text-[#4caf50]">
+                                {{ .GamesWon }}
+                            </p>
+                            <p class="text-xs">Wins</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="font-bold text-[#f44336]">
+                                {{ .GamesLost }}
+                            </p>
+                            <p class="text-xs">Losses</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="font-bold text-[#6b8aa3]">
+                                {{ .WinRate }}
+                            </p>
+                            <p class="text-xs">Win Rate</p>
+                        </div>
+                    </div>
+                </div>
+                {{ end }}
+            </div>
+            {{ else }}
+            <div class="bg-[#f8f9fa] rounded-lg p-8 text-center">
+                <p class="text-[#666] text-lg">
+                    No players yet. Be the first to play!
+                </p>
+            </div>
+            {{ end }}
+
+            <!-- Play button -->
+            <div class="mt-7 text-center">
+                <a
+                    href="/guess"
+                    class="inline-block py-4 px-10 text-xl font-bold text-white bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(107,138,163,0.4)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(107,138,163,0.6)] no-underline"
+                >
+                    Play Now
+                </a>
+            </div>
+        </div>
+    </body>
+</html>

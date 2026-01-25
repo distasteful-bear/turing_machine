@@ -10,6 +10,40 @@
     <body
         class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex justify-center items-center p-5"
     >
+        <!-- Navigation buttons in upper corner -->
+        <div
+            id="authSection"
+            class="fixed top-5 right-5 z-20 flex flex-col gap-3 items-end"
+        >
+            <a
+                href="/leaderboard"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Leaderboard
+            </a>
+            <a
+                id="loginBtn"
+                href="login"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Login
+            </a>
+            <a
+                id="userBtn"
+                href="user"
+                class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                <img
+                    id="userPicture"
+                    src=""
+                    alt=""
+                    width="24"
+                    height="24"
+                    class="w-6 h-6 rounded-full object-cover"
+                />
+                <span id="userNickname"></span>
+            </a>
+        </div>
         <div
             class="max-w-[900px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-10 animate-fade-in"
         >
@@ -170,7 +204,34 @@
             window.onload = function () {
                 loadPuzzle();
                 setupInputHandlers();
+                checkAuthStatus();
             };
+
+            function checkAuthStatus() {
+                axios
+                    .get("/auth_status")
+                    .then((response) => {
+                        if (response.data.logged_in) {
+                            document
+                                .getElementById("loginBtn")
+                                .classList.add("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.remove("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.add("flex");
+                            document.getElementById("userPicture").src =
+                                response.data.picture;
+                            document.getElementById(
+                                "userNickname",
+                            ).textContent = response.data.nickname;
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Could not check auth status:", error);
+                    });
+            }
 
             function setupInputHandlers() {
                 // Auto-focus next input

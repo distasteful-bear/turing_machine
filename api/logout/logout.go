@@ -5,11 +5,17 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 // Handler for our logout.
 func Handler(ctx *gin.Context) {
+	// Clear the session
+	session := sessions.Default(ctx)
+	session.Clear()
+	session.Save()
+
 	logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
@@ -21,7 +27,8 @@ func Handler(ctx *gin.Context) {
 		scheme = "https"
 	}
 
-	returnTo, err := url.Parse(scheme + "://" + ctx.Request.Host)
+	// Redirect to home page after logout, not back to /logout
+	returnTo, err := url.Parse(scheme + "://" + ctx.Request.Host + "/")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return

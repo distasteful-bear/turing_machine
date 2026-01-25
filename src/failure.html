@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script
             src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
             integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
@@ -14,6 +15,40 @@
     <body
         class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#f44336] to-[#e91e63] min-h-screen flex justify-center items-center p-5"
     >
+        <!-- Navigation buttons in upper corner -->
+        <div
+            id="authSection"
+            class="fixed top-5 right-5 z-20 flex flex-col gap-3 items-end"
+        >
+            <a
+                href="/leaderboard"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Leaderboard
+            </a>
+            <a
+                id="loginBtn"
+                href="login"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Login
+            </a>
+            <a
+                id="userBtn"
+                href="user"
+                class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                <img
+                    id="userPicture"
+                    src=""
+                    alt=""
+                    width="24"
+                    height="24"
+                    class="w-6 h-6 rounded-full object-cover"
+                />
+                <span id="userNickname"></span>
+            </a>
+        </div>
         <div
             class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] py-12 px-10 text-center animate-slide-in"
         >
@@ -191,16 +226,44 @@
         <script>
             window.onload = function () {
                 loadResults();
+                checkAuthAndRecord();
             };
 
+            function checkAuthAndRecord() {
+                axios
+                    .get("/auth_status")
+                    .then((response) => {
+                        if (response.data.logged_in) {
+                            // Show user button
+                            document
+                                .getElementById("loginBtn")
+                                .classList.add("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.remove("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.add("flex");
+                            document.getElementById("userPicture").src =
+                                response.data.picture;
+                            document.getElementById(
+                                "userNickname",
+                            ).textContent = response.data.nickname;
+                            // Record game
+                            recordGame();
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Could not check auth status:", error);
+                    });
+            }
+
             function loadResults() {
-                // Get answer from URL parameter
+                // Get parameters from URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const yourAnswer = urlParams.get("answer") || "123";
-
-                // TODO: Get correct answer from backend
-                // GET /api/puzzle/solution
-                const correctAnswer = "345"; // Mock data
+                const correctAnswer = urlParams.get("solution") || "???";
+                const guesses = parseInt(urlParams.get("guesses")) || 0;
 
                 // Display answers
                 displayAnswer("yourAnswer", yourAnswer, "#f44336");
@@ -214,12 +277,32 @@
                 document.getElementById("closeness").textContent =
                     `${correctDigits}/3`;
 
-                // TODO: Load actual game statistics from backend
-                const guesses = Math.floor(Math.random() * 10) + 5;
+                // Display actual guess count
                 document.getElementById("guessCount").textContent = guesses;
 
                 // Generate explanation
                 generateExplanation(yourAnswer, correctAnswer);
+            }
+
+            function recordGame() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const guesses = parseInt(urlParams.get("guesses")) || 0;
+
+                // Record game completion to backend
+                axios
+                    .post("/record_game", {
+                        won: false,
+                        guess_count: guesses,
+                    })
+                    .then((response) => {
+                        console.log("Game recorded:", response.data);
+                    })
+                    .catch((error) => {
+                        console.log(
+                            "Could not record game (user may not be logged in):",
+                            error,
+                        );
+                    });
             }
 
             function displayAnswer(elementId, answer, color) {

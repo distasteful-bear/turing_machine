@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/static/output.css" />
@@ -9,6 +10,40 @@
     <body
         class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#4caf50] to-[#45a049] min-h-screen flex justify-center items-center p-5"
     >
+        <!-- Navigation buttons in upper corner -->
+        <div
+            id="authSection"
+            class="fixed top-5 right-5 z-20 flex flex-col gap-3 items-end"
+        >
+            <a
+                href="/leaderboard"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Leaderboard
+            </a>
+            <a
+                id="loginBtn"
+                href="login"
+                class="py-2 px-5 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                Login
+            </a>
+            <a
+                id="userBtn"
+                href="user"
+                class="hidden items-center gap-2 py-1.5 px-4 text-sm font-bold text-white bg-white/20 backdrop-blur-sm border border-white/30 rounded-full cursor-pointer transition-all duration-200 hover:bg-white/30 hover:-translate-y-0.5 no-underline"
+            >
+                <img
+                    id="userPicture"
+                    src=""
+                    alt=""
+                    width="24"
+                    height="24"
+                    class="w-6 h-6 rounded-full object-cover"
+                />
+                <span id="userNickname"></span>
+            </a>
+        </div>
         <div
             class="max-w-[700px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] py-12 px-10 text-center animate-celebration relative z-10"
         >
@@ -99,9 +134,10 @@
                 Machine!
             </div>
 
-            <!-- Login prompt to save results -->
+            <!-- Login prompt to save results (shown only when not logged in) -->
             <div
-                class="bg-[#e3f2fd] border-2 border-[#6b8aa3] rounded-lg p-5 my-6"
+                id="loginPrompt"
+                class="hidden bg-[#e3f2fd] border-2 border-[#6b8aa3] rounded-lg p-5 my-6"
             >
                 <h3 class="text-[#6b8aa3] mb-2 font-bold">Save Your Results</h3>
                 <p class="text-[#666] text-sm mb-4">
@@ -113,6 +149,17 @@
                 >
                     Login to Save
                 </a>
+            </div>
+
+            <!-- Stats saved confirmation (shown only when logged in) -->
+            <div
+                id="statsSaved"
+                class="hidden bg-[#e8f5e9] border-2 border-[#4caf50] rounded-lg p-5 my-6"
+            >
+                <h3 class="text-[#4caf50] mb-2 font-bold">Stats Saved!</h3>
+                <p class="text-[#666] text-sm">
+                    Your game has been recorded to your profile.
+                </p>
             </div>
 
             <div class="mt-7 pt-7 border-t-2 border-[#eee]">
@@ -160,16 +207,58 @@
                 loadResults();
                 createConfetti();
                 displayRandomMessage();
+                checkAuthAndRecord();
 
                 // Play success sound (optional)
                 // const audio = new Audio('success.mp3');
                 // audio.play();
             };
 
+            function checkAuthAndRecord() {
+                axios
+                    .get("/auth_status")
+                    .then((response) => {
+                        if (response.data.logged_in) {
+                            // Show user button
+                            document
+                                .getElementById("loginBtn")
+                                .classList.add("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.remove("hidden");
+                            document
+                                .getElementById("userBtn")
+                                .classList.add("flex");
+                            document.getElementById("userPicture").src =
+                                response.data.picture;
+                            document.getElementById(
+                                "userNickname",
+                            ).textContent = response.data.nickname;
+                            // Record game and show confirmation
+                            recordGame();
+                            document
+                                .getElementById("statsSaved")
+                                .classList.remove("hidden");
+                        } else {
+                            // Show login prompt
+                            document
+                                .getElementById("loginPrompt")
+                                .classList.remove("hidden");
+                        }
+                    })
+                    .catch((error) => {
+                        console.log("Could not check auth status:", error);
+                        document
+                            .getElementById("loginPrompt")
+                            .classList.remove("hidden");
+                    });
+            }
+
             function loadResults() {
-                // Get answer from URL parameter
+                // Get parameters from URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const answer = urlParams.get("answer") || "123";
+                const guesses = parseInt(urlParams.get("guesses")) || 0;
 
                 // Display answer
                 const digits = answer.split("");
@@ -181,11 +270,7 @@
                     )
                     .join("");
 
-                // TODO: Load actual game statistics from backend
-                // GET /api/puzzle/results
-
-                // Mock statistics for now
-                const guesses = Math.floor(Math.random() * 8) + 3;
+                // Display actual guess count
                 document.getElementById("guessCount").textContent = guesses;
 
                 // Calculate efficiency rating
@@ -200,6 +285,27 @@
                 // Update share text
                 const shareText = `I solved today's Turing Machine puzzle in ${guesses} guesses!`;
                 document.getElementById("shareText").textContent = shareText;
+            }
+
+            function recordGame() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const guesses = parseInt(urlParams.get("guesses")) || 0;
+
+                // Record game completion to backend
+                axios
+                    .post("/record_game", {
+                        won: true,
+                        guess_count: guesses,
+                    })
+                    .then((response) => {
+                        console.log("Game recorded:", response.data);
+                    })
+                    .catch((error) => {
+                        console.log(
+                            "Could not record game (user may not be logged in):",
+                            error,
+                        );
+                    });
             }
 
             function displayRandomMessage() {

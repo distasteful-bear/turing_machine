@@ -50,18 +50,70 @@
                     </p>
                 </div>
 
-                <!-- Leaderboard Rank -->
+                <!-- Wins -->
                 <div
-                    class="bg-white border-2 border-[#6b8aa3] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(107,138,163,0.3)]"
+                    class="bg-white border-2 border-[#4caf50] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(76,175,80,0.3)]"
                 >
-                    <h3 class="text-[#6b8aa3] text-base mb-2 font-bold">
-                        Leaderboard Rank
+                    <h3 class="text-[#4caf50] text-base mb-2 font-bold">
+                        Wins
                     </h3>
                     <p class="text-4xl font-bold text-[#333]">
-                        {{ if eq .LeaderboardRank 0 }}--{{ else }}{{
-                        .LeaderboardRank }}{{ end }}
+                        {{ .GamesWon }}
                     </p>
                 </div>
+
+                <!-- Losses -->
+                <div
+                    class="bg-white border-2 border-[#f44336] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(244,67,54,0.3)]"
+                >
+                    <h3 class="text-[#f44336] text-base mb-2 font-bold">
+                        Losses
+                    </h3>
+                    <p class="text-4xl font-bold text-[#333]">
+                        {{ .GamesLost }}
+                    </p>
+                </div>
+
+                <!-- Total Guesses -->
+                <div
+                    class="bg-white border-2 border-[#ff9800] rounded-lg p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_5px_15px_rgba(255,152,0,0.3)]"
+                >
+                    <h3 class="text-[#ff9800] text-base mb-2 font-bold">
+                        Total Guesses
+                    </h3>
+                    <p class="text-4xl font-bold text-[#333]">
+                        {{ .TotalGuesses }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Win Rate -->
+            <div class="bg-[#f8f9fa] rounded-lg p-4 my-5">
+                <div class="flex justify-between items-center">
+                    <span class="text-[#666] font-bold">Win Rate</span>
+                    <span class="text-2xl font-bold text-[#6b8aa3]">
+                        {{ .WinRate }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center mt-2">
+                    <span class="text-[#666] font-bold">Avg Guesses/Game</span>
+                    <span class="text-2xl font-bold text-[#6b8aa3]">
+                        {{ .AvgGuesses }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Leaderboard Rank -->
+            <div
+                class="bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] rounded-lg p-6 text-center my-5"
+            >
+                <h3 class="text-white/80 text-base mb-2 font-bold">
+                    Leaderboard Rank
+                </h3>
+                <p class="text-5xl font-bold text-white">
+                    {{ if eq .LeaderboardRank 0 }}Unranked{{ else }}#{{
+                    .LeaderboardRank }}{{ end }}
+                </p>
             </div>
 
             <div
