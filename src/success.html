@@ -187,19 +187,8 @@
                         if (response.data.logged_in) {
                             // Show user button
                             document
-                                .getElementById("loginBtn")
+                                .getElementById("loginPrompt")
                                 .classList.add("hidden");
-                            document
-                                .getElementById("userBtn")
-                                .classList.remove("hidden");
-                            document
-                                .getElementById("userBtn")
-                                .classList.add("flex");
-                            document.getElementById("userPicture").src =
-                                response.data.picture;
-                            document.getElementById(
-                                "userNickname",
-                            ).textContent = response.data.nickname;
                             // Record game and show confirmation
                             recordGame();
                             document

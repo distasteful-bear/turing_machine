@@ -65,28 +65,29 @@ func GetOrCreateUser(ctx context.Context, client *firestore.Client, userID, nick
 // RecordGameCompletion updates a user's stats after completing a game
 func RecordGameCompletion(ctx context.Context, client *firestore.Client, userID string, won bool, guessCount int) error {
 	docRef := client.Collection("users").Doc(userID)
+	doc, err := docRef.Get(ctx)
+	if err != nil {
+		return err
+	}
 
-	return client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		doc, err := tx.Get(docRef)
-		if err != nil {
-			return err
-		}
+	var user UserRecord
+	if err := doc.DataTo(&user); err != nil {
+		return err
+	}
 
-		var user UserRecord
-		if err := doc.DataTo(&user); err != nil {
-			return err
-		}
+	user.GamesPlayed++
+	user.TotalGuesses += guessCount
+	if won {
+		user.GamesWon++
+	} else {
+		user.GamesLost++
+	}
 
-		user.GamesPlayed++
-		user.TotalGuesses += guessCount
-		if won {
-			user.GamesWon++
-		} else {
-			user.GamesLost++
-		}
-
-		return tx.Set(docRef, user)
-	})
+	_, err = docRef.Set(ctx, user)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetTopUsers retrieves the top N users sorted by leaderboard rank
@@ -127,7 +128,7 @@ func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) e
 	// Step 1: Query top 100 users by games played
 	docs, err := client.Collection("users").
 		OrderBy("games_played", firestore.Desc).
-		Limit(100).
+		Limit(10).
 		Documents(ctx).
 		GetAll()
 
@@ -143,17 +144,12 @@ func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) e
 			continue
 		}
 
-		// Skip users with no games played
-		if user.GamesPlayed == 0 {
-			continue
-		}
-
 		// Calculate average guesses per game
 		avgGuesses := float64(user.TotalGuesses) / float64(user.GamesPlayed)
 
-		// Avoid division by zero - if avgGuesses is 0, use a small value
+		// Avoid division by zero
 		if avgGuesses == 0 {
-			avgGuesses = 0.1
+			avgGuesses = 10
 		}
 
 		// Score = games_played / avg_guesses
