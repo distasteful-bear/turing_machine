@@ -190,6 +190,9 @@ func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) e
 	}
 	bulkWriter.Flush()
 
+	// separate bulk writer for updating ranks
+	bulkWriter = client.BulkWriter(ctx)
+
 	// Set new ranks for top users
 	for rank, ru := range rankedUsers {
 		docRef := client.Collection("users").Doc(ru.UserID)
