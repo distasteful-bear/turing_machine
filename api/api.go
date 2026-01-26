@@ -174,6 +174,7 @@ func SetupRouter() *gin.Engine {
 		// Retrieve puzzle ID from session
 		puzzleID := session.Get("puzzle_id")
 		if puzzleID == nil {
+			fmt.Println("No puzzle session found")
 			c.JSON(400, gin.H{"error": "no puzzle session found"})
 			return
 		}
@@ -181,6 +182,7 @@ func SetupRouter() *gin.Engine {
 		// Get session store
 		storeInterface, exists := c.Get("session_store")
 		if !exists {
+			fmt.Println("Session store not initialized")
 			c.JSON(500, gin.H{"error": "session store not initialized"})
 			return
 		}
@@ -189,6 +191,7 @@ func SetupRouter() *gin.Engine {
 		// Retrieve puzzle from server-side storage
 		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
 		if !ok {
+
 			c.JSON(400, gin.H{"error": "puzzle not found in store"})
 			return
 		}
