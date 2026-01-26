@@ -165,7 +165,6 @@ func SetupRouter() *gin.Engine {
 			})
 		}
 
-		fmt.Println("Puzzle stored with ID:", sessionID) // Testing
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
 	router.GET("/check_guess", func(c *gin.Context) {
