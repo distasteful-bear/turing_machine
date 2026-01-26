@@ -122,12 +122,12 @@ type rankedUser struct {
 }
 
 // ComputeLeaderboardRankings calculates and updates leaderboard rankings
-// Ranking formula: games_played / avg_guesses_per_game
+// Ranking formula: games_won / avg_guesses_per_game
 // This rewards playing many games while encouraging fewer guesses per game
 func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) error {
-	// Step 1: Query top 100 users by games played
+	// Step 1: Query top 100 users by games won
 	docs, err := client.Collection("users").
-		OrderBy("games_played", firestore.Desc).
+		OrderBy("games_won", firestore.Desc).
 		Limit(10).
 		Documents(ctx).
 		GetAll()
@@ -154,7 +154,7 @@ func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) e
 
 		// Score = games_played / avg_guesses
 		// Higher is better (more games, fewer guesses)
-		score := float64(user.GamesPlayed) / avgGuesses
+		score := float64(user.GamesWon) / avgGuesses
 
 		rankedUsers = append(rankedUsers, rankedUser{
 			UserID: user.UserID,
