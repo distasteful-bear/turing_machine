@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type SessionToken struct {
@@ -139,13 +140,14 @@ func SetupRouter() *gin.Engine {
 		store := storeInterface.(*SessionStore)
 
 		// Generate a unique puzzle ID for this session
-		sessionID := session.ID()
+		sessionID := uuid.New().String()
 
 		// Store puzzle in server-side memory
 		store.ActivePuzzles[sessionID] = puzzle
 
 		// Store only the session ID in the session cookie and reset guess count
 		session.Set("puzzle_id", sessionID)
+		fmt.Println("Puzzle stored with ID:", sessionID) // Testing
 		session.Set("guess_count", 0)
 		session.Save()
 
