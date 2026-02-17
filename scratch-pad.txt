@@ -1,1 +1,0 @@
-https://dev-qvgt28q8o30avdo4.us.auth0.com/authorize?client_id=a406HNkG8TgOz4JWEFLcpTX9KPoCDn1n&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback&response_type=code&scope=openid+profile&state=hsc7ycKc5pkNS32Gdpltx7XePSXKTrQh4VK2csd2TKs%3D
