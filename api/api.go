@@ -194,9 +194,10 @@ func SetupRouter() *gin.Engine {
 		store := storeInterface.(*SessionStore)
 
 		// Retrieve puzzle from server-side storage
-		puzzle, ok := store.ActivePuzzles[puzzleId.(string)]
-		if !ok {
-			c.JSON(400, gin.H{"error": "puzzle not found in store"})
+		puzzleWithExp, ok := store.ActivePuzzles[puzzleId.(string)]
+		if !ok || puzzleWithExp.Expiration.Before(time.Now()) {
+			delete(store.ActivePuzzles, puzzleId.(string))
+			c.JSON(400, gin.H{"error": "puzzle not found in store or was expired"})
 			return
 		}
 
