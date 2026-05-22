@@ -1,7 +1,7 @@
 ./scripts/build.sh
 
+gcloud config set project james-metz
 
-# Deploy to Cloud Ru
 gcloud run deploy turing-machine \
   --platform managed \
   --region us-east4 \
