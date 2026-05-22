@@ -27,7 +27,8 @@ func CalcSolutionFromIndex(idx int) (Solution, error) {
 	if idx < 0 || idx >= 125 {
 		return Solution{}, error(fmt.Errorf("invalid index for solution!!! %v", idx))
 	}
-	base5 := strconv.FormatInt(int64(idx), 5)
+
+	base5 := fmt.Sprintf("%03s", strconv.FormatInt(int64(idx), 5))
 
 	var display = [3]rune{'1', '1', '1'}
 	for i, c := range base5 {
