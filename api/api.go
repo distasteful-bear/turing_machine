@@ -27,16 +27,19 @@ type SessionToken struct {
 	ExpirationTime time.Time
 	TokenStr       string
 }
-
+type PuzzleWithExpiration struct {
+	Puzzle     verifiers.Puzzle
+	Expiration time.Time
+}
 type SessionStore struct {
 	ActiveTokens  []SessionToken
-	ActivePuzzles map[string]verifiers.Puzzle
+	ActivePuzzles map[string]PuzzleWithExpiration
 }
 
 func SetupSessionStoreInMem() gin.HandlerFunc {
 	store := &SessionStore{
 		ActiveTokens:  []SessionToken{},
-		ActivePuzzles: map[string]verifiers.Puzzle{},
+		ActivePuzzles: map[string]PuzzleWithExpiration{},
 	}
 
 	return func(c *gin.Context) {
@@ -141,8 +144,11 @@ func SetupRouter() *gin.Engine {
 		// Generate a unique puzzle ID for this session
 		sessionID := uuid.New().String()
 
-		// Store puzzle in server-side memory
-		store.ActivePuzzles[sessionID] = puzzle
+		puzzleWithExp := PuzzleWithExpiration{
+			Puzzle:     puzzle,
+			Expiration: time.Now().Add(time.Hour),
+		}
+		store.ActivePuzzles[sessionID] = puzzleWithExp
 
 		// Store only the session ID in the session cookie and reset guess count
 		session.Set("puzzle_id", sessionID)
@@ -171,8 +177,8 @@ func SetupRouter() *gin.Engine {
 		session := sessions.Default(c)
 
 		// Retrieve puzzle ID from session
-		puzzleID := session.Get("puzzle_id")
-		if puzzleID == nil {
+		puzzleId := session.Get("puzzle_id")
+		if puzzleId == nil {
 			fmt.Println("No puzzle session found")
 			c.JSON(400, gin.H{"error": "no puzzle session found"})
 			return
@@ -188,7 +194,7 @@ func SetupRouter() *gin.Engine {
 		store := storeInterface.(*SessionStore)
 
 		// Retrieve puzzle from server-side storage
-		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
+		puzzle, ok := store.ActivePuzzles[puzzleId.(string)]
 		if !ok {
 			c.JSON(400, gin.H{"error": "puzzle not found in store"})
 			return
@@ -239,17 +245,8 @@ func SetupRouter() *gin.Engine {
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary, "guess_count": newGuessCount})
 	})
 	router.GET("/check_final", func(c *gin.Context) {
-
+		// session
 		session := sessions.Default(c)
-
-		// Retrieve puzzle ID from session
-		puzzleID := session.Get("puzzle_id")
-		if puzzleID == nil {
-			c.JSON(400, gin.H{"error": "no puzzle session found"})
-			return
-		}
-
-		// Get session store
 		storeInterface, exists := c.Get("session_store")
 		if !exists {
 			c.JSON(500, gin.H{"error": "session store not initialized"})
@@ -257,13 +254,16 @@ func SetupRouter() *gin.Engine {
 		}
 		store := storeInterface.(*SessionStore)
 
-		// Retrieve puzzle from server-side storage
-		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
-		if !ok {
-			c.JSON(400, gin.H{"error": "puzzle not found in store"})
+		// query params
+		puzzleId := session.Get("puzzle_id").(string)
+		if puzzleId == "" {
+			c.JSON(400, gin.H{"error": "no puzzle session found"})
 			return
 		}
-
+		guessCount, ok := session.Get("guess_count").(int)
+		if !ok {
+			guessCount = 0
+		}
 		guess := c.Query("guess")
 		if guess == "" {
 			c.JSON(400, gin.H{"error": "no guess"})
@@ -275,22 +275,20 @@ func SetupRouter() *gin.Engine {
 			return
 		}
 
-		// Get guess count from session and increment for final submission
-		guessCount, ok := session.Get("guess_count").(int)
-		if !ok {
-			guessCount = 0
-		}
-
-		// Convert rune array to string for JSON response
-		solutionStr := string(puzzle.Sol.Display[:])
-		success := proposedSolution.Display == puzzle.Sol.Display
-
-		userId, err := user.IsUserLoggedIn(c)
-		if err != nil {
-			c.JSON(403, gin.H{"status": "error", "message": err})
+		// retrieve puzzle from server-side storage
+		puzzleWithExp, ok := store.ActivePuzzles[puzzleId]
+		defer delete(store.ActivePuzzles, puzzleId)
+		if !ok || puzzleWithExp.Expiration.Before(time.Now()) {
+			delete(store.ActivePuzzles, puzzleId)
+			c.JSON(400, gin.H{"error": "puzzle not found in store"})
 			return
 		}
 
+		puzzle := puzzleWithExp.Puzzle
+		success := proposedSolution.Display == puzzle.Sol.Display
+
+		// log results if user is logged in
+		userId, err := user.IsUserLoggedIn(c)
 		if err != nil {
 			err := db.RecordGameCompletion(c.Request.Context(), userId, success, guessCount)
 			if err != nil {
@@ -300,12 +298,14 @@ func SetupRouter() *gin.Engine {
 			}
 		}
 
-		// Recompute leaderboard rankings
+		// compute leaderboard rankings
 		err = db.ComputeLeaderboardRankings(c.Request.Context())
 		if err != nil {
 			log.Printf("Error computing leaderboard rankings: %v", err)
-			// Don't fail the request, just log the error
 		}
+
+		// Convert rune array to string for JSON response
+		solutionStr := string(puzzle.Sol.Display[:])
 
 		if success {
 			c.JSON(200, gin.H{"status": "success", "guess_count": guessCount, "solution": solutionStr})
