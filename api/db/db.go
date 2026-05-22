@@ -155,15 +155,15 @@ func ComputeLeaderboardRankings(ctx context.Context) error {
 			continue
 		}
 
-		// Calculate average guesses per game
-		avgGuesses := float64(user.TotalGuesses) / float64(user.GamesPlayed)
+		// Calculate average guesses per win
+		avgGuesses := float64(user.TotalGuesses) / float64(user.GamesWon)
 
 		// Avoid division by zero
 		if avgGuesses == 0 {
 			avgGuesses = 10
 		}
 
-		// Score = games_played / avg_guesses
+		// Score = games_played / avg_guesses_per_win
 		// Higher is better (more games, fewer guesses)
 		score := float64(user.GamesWon) / avgGuesses
 
