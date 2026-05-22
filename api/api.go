@@ -134,12 +134,24 @@ func SetupRouter() *gin.Engine {
 		puzzle := verifiers.GenerateRandomPuzzle()
 
 		// Get or create session store
-		storeInterface, exists := c.Get("session_store")
-		if !exists {
+		storeInterface, ok := c.Get("session_store")
+		if !ok {
 			c.JSON(500, gin.H{"error": "session store not initialized"})
 			return
 		}
 		store := storeInterface.(*SessionStore)
+
+		// clear expired puzzles
+		for key, p := range store.ActivePuzzles {
+			if p.Expiration.Before(time.Now()) {
+				delete(store.ActivePuzzles, key)
+			}
+		}
+		if len(store.ActivePuzzles) > 10_000_000 {
+			// lol 10 million is alot
+			c.JSON(500, gin.H{"error": "too many active games"})
+			return
+		}
 
 		// Generate a unique puzzle ID for this session
 		sessionID := uuid.New().String()
@@ -172,6 +184,7 @@ func SetupRouter() *gin.Engine {
 
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary})
 	})
+
 	router.GET("/check_guess", func(c *gin.Context) {
 
 		session := sessions.Default(c)
@@ -200,6 +213,7 @@ func SetupRouter() *gin.Engine {
 			c.JSON(400, gin.H{"error": "puzzle not found in store or was expired"})
 			return
 		}
+		puzzle := puzzleWithExp.Puzzle
 
 		guess := c.Query("guess")
 		if guess == "" {
@@ -245,6 +259,7 @@ func SetupRouter() *gin.Engine {
 		}
 		c.JSON(200, gin.H{"status": "success", "puzzle_summary": puzzleSummary, "guess_count": newGuessCount})
 	})
+
 	router.GET("/check_final", func(c *gin.Context) {
 		// session
 		session := sessions.Default(c)
