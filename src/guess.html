@@ -8,14 +8,14 @@
         <title>Make a Guess - Turing Machine</title>
     </head>
     <body
-        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex flex-col p-5 sm:p-5 p-2"
+        class="font-['JetBrains_Mono',monospace] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] min-h-screen flex flex-col sm:p-5 p-2"
     >
         <!-- Top Navigation Bar -->
         <div
             class="fixed top-0 left-0 right-0 z-20 bg-[#6b8aa3]/30 backdrop-blur-md border-b border-white/20"
         >
             <div
-                class="max-w-[1200px] mx-auto px-4 py-3 flex justify-between items-center gap-3 flex-wrap"
+                class="max-w-[1200px] mx-auto px-4 py-2 flex justify-between items-center gap-3 flex-wrap"
             >
                 <div class="text-white font-bold text-lg">Turing Machine</div>
                 <div id="authSection" class="flex gap-2 items-center flex-wrap">
@@ -47,9 +47,9 @@
 
         <!-- Main Content -->
         <div
-            class="max-w-[900px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-10 p-4 animate-fade-in mt-20 mx-auto"
+            class="max-w-[900px] w-full bg-white rounded-[20px] shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-4 animate-fade-in mt-20 mx-auto"
         >
-            <h1 class="text-[#333] text-center mb-7 text-3xl font-bold">
+            <h1 class="text-[#333] text-center mb-3 text-3xl font-bold">
                 Make Your Guess
             </h1>
 
@@ -65,8 +65,8 @@
                 </div>
             </div>
 
-            <div class="bg-[#f8f9fa] sm:p-5 p-2 rounded-lg mb-7">
-                <h2 class="text-[#6b8aa3] mb-4 text-xl font-bold">
+            <div class="bg-[#f8f9fa] p-2 rounded-lg mb-4">
+                <h2 class="text-[#6b8aa3] mb-2 text-xl font-bold">
                     Verifiers for This Puzzle
                 </h2>
                 <div class="grid gap-2.5" id="verifierList">
@@ -90,7 +90,7 @@
             </div>
 
             <div class="my-7">
-                <h2 class="text-[#333] mb-5 text-center text-xl font-bold">
+                <h2 class="text-[#333] mb-3 text-center text-xl font-bold">
                     Enter Your Guess
                 </h2>
 
@@ -156,23 +156,17 @@
 
                 <div class="flex justify-center gap-4 flex-wrap">
                     <button
-                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        class="py-2 px-4 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
                         onclick="submitGuess()"
                     >
                         Check This Guess
                     </button>
                     <button
-                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#4caf50] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
+                        class="py-2 px-4 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#4caf50] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
                         onclick="goToFinalAnswer()"
                         id="finalAnswerBtn"
                     >
                         Submit Final Answer
-                    </button>
-                    <button
-                        class="py-4 px-7 text-lg font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-[#ff9800] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] active:translate-y-0"
-                        onclick="resetGame()"
-                    >
-                        Start Over
                     </button>
                 </div>
             </div>
@@ -287,7 +281,7 @@
                 verifierList.innerHTML = verifiers
                     .map(
                         (v) => `
-                          <div class="bg-white p-4 rounded-lg border-l-4 border-[#6b8aa3] flex items-center gap-4">
+                          <div class="bg-white p-2 rounded-lg border-l-4 border-[#6b8aa3] flex items-center gap-4">
                               <div class="bg-[#6b8aa3] text-white w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0">${letters[v["id"]] || String(v["id"] + 1)}</div>
                               <div class="flex-1 text-[#333]">${v.description}</div>
                               <span class="py-1.5 px-4 rounded font-bold min-w-[70px] text-center ${getResultClass(v.result)}" id="result-${v.id}">

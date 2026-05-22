@@ -61,19 +61,6 @@
                 Ready to solve the puzzle?
             </p>
 
-            <div
-                class="bg-[#fff3cd] border-2 border-[#ffc107] rounded-lg p-5 mb-7 text-center"
-            >
-                <h2 class="text-[#f57c00] mb-2.5 text-xl font-bold">
-                    Final Submission
-                </h2>
-                <p class="text-[#666] leading-relaxed">
-                    This is your final answer! Make sure you've deduced the
-                    correct code from the verifier results. You only get one
-                    chance!
-                </p>
-            </div>
-
             <div class="bg-[#f8f9fa] p-5 rounded-lg mb-7">
                 <h3 class="text-[#6b8aa3] mb-4 text-center text-xl font-bold">
                     Your Progress
@@ -164,14 +151,6 @@
                         />
                         I am confident this is the correct answer
                     </label>
-                </div>
-
-                <div
-                    class="bg-[#fff9e6] border-l-4 border-[#ffd54f] p-4 my-5 rounded text-[0.95em] text-[#666]"
-                >
-                    <strong>Double-check:</strong> Review all your previous
-                    guesses and verifier results. Make sure every constraint is
-                    satisfied by your answer!
                 </div>
 
                 <div
@@ -293,6 +272,20 @@
                 btn.disabled = !isConfirmed;
             }
 
+            function setSubmitting(isSubmitting) {
+                const loading = document.getElementById("loading");
+                const btn = document.getElementById("submitBtn");
+
+                loading.classList.toggle("hidden", !isSubmitting);
+                loading.classList.toggle("block", isSubmitting);
+
+                if (isSubmitting) {
+                    btn.disabled = true;
+                } else {
+                    updateSubmitButton();
+                }
+            }
+
             function submitFinalAnswer() {
                 const digit1 = document.getElementById("digit1").value;
                 const digit2 = document.getElementById("digit2").value;
@@ -321,9 +314,7 @@
                 }
 
                 // Show loading
-                document.getElementById("loading").classList.remove("hidden");
-                document.getElementById("loading").classList.add("block");
-                document.getElementById("submitBtn").disabled = true;
+                setSubmitting(true);
 
                 axios
                     .get(`/check_final?guess=${answer}`)
@@ -340,7 +331,27 @@
                     })
                     .catch((error) => {
                         console.error(error);
-                        showError("Failed to send guess");
+                        setSubmitting(false);
+
+                        const status = error.response?.status;
+                        const serverMessage = error.response?.data?.error;
+
+                        if (status === 400) {
+                            if (
+                                serverMessage?.includes("puzzle") ||
+                                serverMessage?.includes("session")
+                            ) {
+                                showError(
+                                    "Your puzzle session expired. Go back and start a new puzzle.",
+                                );
+                                return;
+                            }
+
+                            showError(serverMessage || "Check your answer and try again.");
+                            return;
+                        }
+
+                        showError("Failed to send guess. Please try again.");
                     });
             }
 

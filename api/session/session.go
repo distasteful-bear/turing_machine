@@ -26,7 +26,7 @@ type SessionStore struct {
 }
 
 const (
-	maxActivePuzzles = 10_000_000
+	maxActivePuzzles = 10_000
 	puzzleTTL        = time.Hour
 	pruneInterval    = time.Minute
 )

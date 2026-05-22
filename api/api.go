@@ -266,19 +266,23 @@ func setupPuzzleRoutes(router gin.IRoutes) {
 
 		// log results if user is logged in
 		userId, err := user.IsUserLoggedIn(c)
-		if err != nil {
+		recordedGame := false
+		if err == nil {
 			err := db.RecordGameCompletion(c.Request.Context(), userId, success, guessCount)
 			if err != nil {
 				log.Printf("Error recording game completion: %v", err)
 				c.JSON(500, gin.H{"error": "failed to record game"})
 				return
 			}
+			recordedGame = true
 		}
 
 		// compute leaderboard rankings
-		err = db.ComputeLeaderboardRankings(c.Request.Context())
-		if err != nil {
-			log.Printf("Error computing leaderboard rankings: %v", err)
+		if recordedGame {
+			err = db.ComputeLeaderboardRankings(c.Request.Context())
+			if err != nil {
+				log.Printf("Error computing leaderboard rankings: %v", err)
+			}
 		}
 
 		// Convert rune array to string for JSON response

@@ -56,7 +56,7 @@ func TestSetupSessionLoadDoesNotCrash(t *testing.T) {
 func TestSetupSessionConcurrentDoesNotCrash(t *testing.T) {
 	router := newPuzzleTestRouter()
 
-	const requests = 100
+	const requests = 1_000 // on recent tests 100k takes 240.684s and 1g of RAM
 	var wg sync.WaitGroup
 	errs := make(chan string, requests)
 

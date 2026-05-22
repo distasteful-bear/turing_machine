@@ -65,6 +65,11 @@ func GetOrCreateUser(ctx context.Context, client *firestore.Client, userID, nick
 // RecordGameCompletion updates a user's stats after completing a game
 func RecordGameCompletion(ctx context.Context, userID string, won bool, guessCount int) error {
 	client, err := GetFirestoreClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
 	docRef := client.Collection("users").Doc(userID)
 	doc, err := docRef.Get(ctx)
 	if err != nil {
@@ -131,6 +136,8 @@ func ComputeLeaderboardRankings(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
+
 	docs, err := client.Collection("users").
 		OrderBy("games_won", firestore.Desc).
 		Limit(10).
