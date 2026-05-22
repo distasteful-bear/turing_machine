@@ -2,6 +2,7 @@ package callback
 
 import (
 	"distasteful-bear/turing_machine/api/authenticator"
+	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -12,14 +13,28 @@ import (
 func Handler(auth *authenticator.Authenticator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		if ctx.Query("state") != session.Get("state") {
+		if oauthErr := ctx.Query("error"); oauthErr != "" {
+			log.Printf("auth callback returned error: %s: %s", oauthErr, ctx.Query("error_description"))
+			ctx.String(http.StatusUnauthorized, "Authorization failed.")
+			return
+		}
+
+		sessionState, ok := session.Get("state").(string)
+		if !ok || ctx.Query("state") != sessionState {
 			ctx.String(http.StatusBadRequest, "Invalid state parameter.")
 			return
 		}
 
+		code := ctx.Query("code")
+		if code == "" {
+			ctx.String(http.StatusBadRequest, "Missing authorization code.")
+			return
+		}
+
 		// Exchange an authorization code for a token.
-		token, err := auth.Exchange(ctx.Request.Context(), ctx.Query("code"))
+		token, err := auth.Exchange(ctx.Request.Context(), code)
 		if err != nil {
+			log.Printf("failed to exchange authorization code for token: %v", err)
 			ctx.String(http.StatusUnauthorized, "Failed to exchange an authorization code for a token.")
 			return
 		}
