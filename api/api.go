@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"distasteful-bear/turing_machine/api/authenticator"
 	"distasteful-bear/turing_machine/api/callback"
 	"distasteful-bear/turing_machine/api/db"
@@ -191,7 +190,6 @@ func SetupRouter() *gin.Engine {
 		// Retrieve puzzle from server-side storage
 		puzzle, ok := store.ActivePuzzles[puzzleID.(string)]
 		if !ok {
-
 			c.JSON(400, gin.H{"error": "puzzle not found in store"})
 			return
 		}
@@ -278,81 +276,44 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Get guess count from session and increment for final submission
-		guessCount := session.Get("guess_count")
-		if guessCount == nil {
+		guessCount, ok := session.Get("guess_count").(int)
+		if !ok {
 			guessCount = 0
 		}
 
 		// Convert rune array to string for JSON response
 		solutionStr := string(puzzle.Sol.Display[:])
+		success := proposedSolution.Display == puzzle.Sol.Display
 
-		if proposedSolution.Display == puzzle.Sol.Display {
+		userId, err := user.IsUserLoggedIn(c)
+		if err != nil {
+			c.JSON(403, gin.H{"status": "error", "message": err})
+			return
+		}
+
+		if err != nil {
+			err := db.RecordGameCompletion(c.Request.Context(), userId, success, guessCount)
+			if err != nil {
+				log.Printf("Error recording game completion: %v", err)
+				c.JSON(500, gin.H{"error": "failed to record game"})
+				return
+			}
+		}
+
+		// Recompute leaderboard rankings
+		err = db.ComputeLeaderboardRankings(c.Request.Context())
+		if err != nil {
+			log.Printf("Error computing leaderboard rankings: %v", err)
+			// Don't fail the request, just log the error
+		}
+
+		if success {
 			c.JSON(200, gin.H{"status": "success", "guess_count": guessCount, "solution": solutionStr})
 			return
 		} else {
 			c.JSON(200, gin.H{"status": "failure", "guess_count": guessCount, "solution": solutionStr})
 			return
 		}
-	})
-
-	// Record game completion for logged-in users
-	router.POST("/record_game", func(c *gin.Context) {
-		session := sessions.Default(c)
-		profile := session.Get("profile")
-
-		// Check if user is logged in
-		if profile == nil {
-			c.JSON(200, gin.H{"status": "ok", "message": "not logged in, stats not recorded"})
-			return
-		}
-
-		profileMap, ok := profile.(map[string]interface{})
-		if !ok {
-			c.JSON(200, gin.H{"status": "ok", "message": "invalid profile, stats not recorded"})
-			return
-		}
-
-		userID, _ := profileMap["sub"].(string)
-		if userID == "" {
-			c.JSON(200, gin.H{"status": "ok", "message": "no user ID, stats not recorded"})
-			return
-		}
-
-		// Parse request body
-		var req struct {
-			Won        bool `json:"won"`
-			GuessCount int  `json:"guess_count"`
-		}
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(400, gin.H{"error": "invalid request body"})
-			return
-		}
-
-		// Record to Firestore
-		firestoreCtx := context.Background()
-		client, err := db.GetFirestoreClient(firestoreCtx)
-		if err != nil {
-			log.Printf("Error creating Firestore client: %v", err)
-			c.JSON(500, gin.H{"error": "failed to connect to database"})
-			return
-		}
-		defer client.Close()
-
-		err = db.RecordGameCompletion(firestoreCtx, client, userID, req.Won, req.GuessCount)
-		if err != nil {
-			log.Printf("Error recording game completion: %v", err)
-			c.JSON(500, gin.H{"error": "failed to record game"})
-			return
-		}
-
-		// Recompute leaderboard rankings
-		err = db.ComputeLeaderboardRankings(firestoreCtx, client)
-		if err != nil {
-			log.Printf("Error computing leaderboard rankings: %v", err)
-			// Don't fail the request, just log the error
-		}
-
-		c.JSON(200, gin.H{"status": "success", "message": "game recorded"})
 	})
 
 	return router

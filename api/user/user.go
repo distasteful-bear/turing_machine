@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"distasteful-bear/turing_machine/api/db"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -101,4 +102,26 @@ func Handler(ctx *gin.Context) {
 		WinRate:         winRate,
 		AvgGuesses:      avgGuesses,
 	})
+}
+
+func IsUserLoggedIn(c *gin.Context) (string, error) {
+	// return uid and optional err
+	session := sessions.Default(c)
+	profile := session.Get("profile")
+	if profile == nil {
+		return "", errors.New("no profile")
+	}
+
+	profileMap, ok := profile.(map[string]interface{})
+	if !ok {
+		return "", errors.New("invalid profile")
+	}
+
+	userId, ok := profileMap["sub"].(string)
+
+	if ok {
+		return userId, nil
+	} else {
+		return "", errors.New("could not locate uid")
+	}
 }

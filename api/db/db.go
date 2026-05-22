@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"distasteful-bear/turing_machine/api/db"
 	"sort"
 
 	"cloud.google.com/go/firestore"
@@ -63,7 +64,8 @@ func GetOrCreateUser(ctx context.Context, client *firestore.Client, userID, nick
 }
 
 // RecordGameCompletion updates a user's stats after completing a game
-func RecordGameCompletion(ctx context.Context, client *firestore.Client, userID string, won bool, guessCount int) error {
+func RecordGameCompletion(ctx context.Context, userID string, won bool, guessCount int) error {
+	client, err := db.GetFirestoreClient(ctx)
 	docRef := client.Collection("users").Doc(userID)
 	doc, err := docRef.Get(ctx)
 	if err != nil {
@@ -124,8 +126,9 @@ type rankedUser struct {
 // ComputeLeaderboardRankings calculates and updates leaderboard rankings
 // Ranking formula: games_won / avg_guesses_per_game
 // This rewards playing many games while encouraging fewer guesses per game
-func ComputeLeaderboardRankings(ctx context.Context, client *firestore.Client) error {
-	// Step 1: Query top 100 users by games won
+func ComputeLeaderboardRankings(ctx context.Context) error {
+	// Step 1: Query top 10 users by games won
+	client := db.GetFirestoreClient(ctx)
 	docs, err := client.Collection("users").
 		OrderBy("games_won", firestore.Desc).
 		Limit(10).

@@ -113,7 +113,7 @@
                     href="login"
                     class="inline-block py-2.5 px-6 text-base font-bold border-none rounded-full cursor-pointer transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#8ba3b8] to-[#4a5f75] text-white hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.3)] no-underline"
                 >
-                    Login to Save
+                    Login
                 </a>
             </div>
 
@@ -173,14 +173,14 @@
                 loadResults();
                 createConfetti();
                 displayRandomMessage();
-                checkAuthAndRecord();
+                checkAuth();
 
                 // Play success sound (optional)
                 // const audio = new Audio('success.mp3');
                 // audio.play();
             };
 
-            function checkAuthAndRecord() {
+            function checkAuth() {
                 axios
                     .get("/auth_status")
                     .then((response) => {
@@ -189,8 +189,6 @@
                             document
                                 .getElementById("loginPrompt")
                                 .classList.add("hidden");
-                            // Record game and show confirmation
-                            recordGame();
                             document
                                 .getElementById("statsSaved")
                                 .classList.remove("hidden");
@@ -240,27 +238,6 @@
                 // Update share text
                 const shareText = `I solved today's Turing Machine puzzle in ${guesses} guesses!`;
                 document.getElementById("shareText").textContent = shareText;
-            }
-
-            function recordGame() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const guesses = parseInt(urlParams.get("guesses")) || 0;
-
-                // Record game completion to backend
-                axios
-                    .post("/record_game", {
-                        won: true,
-                        guess_count: guesses,
-                    })
-                    .then((response) => {
-                        console.log("Game recorded:", response.data);
-                    })
-                    .catch((error) => {
-                        console.log(
-                            "Could not record game (user may not be logged in):",
-                            error,
-                        );
-                    });
             }
 
             function displayRandomMessage() {

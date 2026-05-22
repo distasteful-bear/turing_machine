@@ -193,10 +193,10 @@
         <script>
             window.onload = function () {
                 loadResults();
-                checkAuthAndRecord();
+                checkAuth();
             };
 
-            function checkAuthAndRecord() {
+            function checkAuth() {
                 axios
                     .get("/auth_status")
                     .then((response) => {
@@ -216,8 +216,6 @@
                             document.getElementById(
                                 "userNickname",
                             ).textContent = response.data.nickname;
-                            // Record game
-                            recordGame();
                         }
                     })
                     .catch((error) => {
@@ -249,27 +247,6 @@
 
                 // Generate explanation
                 generateExplanation(yourAnswer, correctAnswer);
-            }
-
-            function recordGame() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const guesses = parseInt(urlParams.get("guesses")) || 0;
-
-                // Record game completion to backend
-                axios
-                    .post("/record_game", {
-                        won: false,
-                        guess_count: guesses,
-                    })
-                    .then((response) => {
-                        console.log("Game recorded:", response.data);
-                    })
-                    .catch((error) => {
-                        console.log(
-                            "Could not record game (user may not be logged in):",
-                            error,
-                        );
-                    });
             }
 
             function displayAnswer(elementId, answer, color) {
