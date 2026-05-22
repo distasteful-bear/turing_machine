@@ -8,12 +8,14 @@ import (
 	"distasteful-bear/turing_machine/api/login"
 	"distasteful-bear/turing_machine/api/logout"
 	"distasteful-bear/turing_machine/api/middleware"
+	"distasteful-bear/turing_machine/api/session"
 	"distasteful-bear/turing_machine/api/user"
 	"distasteful-bear/turing_machine/utils"
 	"distasteful-bear/turing_machine/verifiers"
 	"encoding/gob"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -21,32 +23,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
-
-type SessionToken struct {
-	CreationTime   time.Time
-	ExpirationTime time.Time
-	TokenStr       string
-}
-type PuzzleWithExpiration struct {
-	Puzzle     verifiers.Puzzle
-	Expiration time.Time
-}
-type SessionStore struct {
-	ActiveTokens  []SessionToken
-	ActivePuzzles map[string]PuzzleWithExpiration
-}
-
-func SetupSessionStoreInMem() gin.HandlerFunc {
-	store := &SessionStore{
-		ActiveTokens:  []SessionToken{},
-		ActivePuzzles: map[string]PuzzleWithExpiration{},
-	}
-
-	return func(c *gin.Context) {
-		c.Set("session_store", store)
-		c.Next()
-	}
-}
 
 func SetupRouter() *gin.Engine {
 	// Initialize Gin router
@@ -60,7 +36,7 @@ func SetupRouter() *gin.Engine {
 	router.Use(sessions.Sessions("auth-session", store))
 
 	// Setup server-side session store for puzzles
-	router.Use(SetupSessionStoreInMem())
+	router.Use(session.SetupSessionStoreInMem())
 
 	// Load HTML templates from the src directory
 	router.LoadHTMLGlob("src/*.html")
@@ -126,47 +102,37 @@ func SetupRouter() *gin.Engine {
 		})
 	})
 
+	setupPuzzleRoutes(router)
+
+	return router
+}
+
+func setupPuzzleRoutes(router gin.IRoutes) {
 	// puzzle data management
 	router.GET("/setup_session", func(c *gin.Context) {
-		session := sessions.Default(c)
+		curSession := sessions.Default(c)
 
-		// Generate a new puzzle
 		puzzle := verifiers.GenerateRandomPuzzle()
 
-		// Get or create session store
 		storeInterface, ok := c.Get("session_store")
 		if !ok {
 			c.JSON(500, gin.H{"error": "session store not initialized"})
 			return
 		}
-		store := storeInterface.(*SessionStore)
-
-		// clear expired puzzles
-		for key, p := range store.ActivePuzzles {
-			if p.Expiration.Before(time.Now()) {
-				delete(store.ActivePuzzles, key)
-			}
-		}
-		if len(store.ActivePuzzles) > 10_000_000 {
-			// lol 10 million is alot
-			c.JSON(500, gin.H{"error": "too many active games"})
-			return
-		}
+		store := storeInterface.(*session.SessionStore)
 
 		// Generate a unique puzzle ID for this session
 		sessionID := uuid.New().String()
 
-		puzzleWithExp := PuzzleWithExpiration{
-			Puzzle:     puzzle,
-			Expiration: time.Now().Add(time.Hour),
+		if err := store.AddPuzzle(sessionID, puzzle, time.Now()); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+			return
 		}
-		store.ActivePuzzles[sessionID] = puzzleWithExp
 
 		// Store only the session ID in the session cookie and reset guess count
-		session.Set("puzzle_id", sessionID)
-		fmt.Println("Puzzle stored with ID:", sessionID) // Testing
-		session.Set("guess_count", 0)
-		session.Save()
+		curSession.Set("puzzle_id", sessionID)
+		curSession.Set("guess_count", 0)
+		curSession.Save()
 
 		type verSummary struct {
 			Id          int    `json:"id"`
@@ -187,10 +153,10 @@ func SetupRouter() *gin.Engine {
 
 	router.GET("/check_guess", func(c *gin.Context) {
 
-		session := sessions.Default(c)
+		curSession := sessions.Default(c)
 
 		// Retrieve puzzle ID from session
-		puzzleId := session.Get("puzzle_id")
+		puzzleId := curSession.Get("puzzle_id")
 		if puzzleId == nil {
 			fmt.Println("No puzzle session found")
 			c.JSON(400, gin.H{"error": "no puzzle session found"})
@@ -204,16 +170,14 @@ func SetupRouter() *gin.Engine {
 			c.JSON(500, gin.H{"error": "session store not initialized"})
 			return
 		}
-		store := storeInterface.(*SessionStore)
+		store := storeInterface.(*session.SessionStore)
 
 		// Retrieve puzzle from server-side storage
-		puzzleWithExp, ok := store.ActivePuzzles[puzzleId.(string)]
-		if !ok || puzzleWithExp.Expiration.Before(time.Now()) {
-			delete(store.ActivePuzzles, puzzleId.(string))
+		puzzle, ok := store.GetPuzzle(puzzleId.(string), time.Now())
+		if !ok {
 			c.JSON(400, gin.H{"error": "puzzle not found in store or was expired"})
 			return
 		}
-		puzzle := puzzleWithExp.Puzzle
 
 		guess := c.Query("guess")
 		if guess == "" {
@@ -227,13 +191,13 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Increment guess count in session
-		guessCount := session.Get("guess_count")
+		guessCount := curSession.Get("guess_count")
 		if guessCount == nil {
 			guessCount = 0
 		}
 		newGuessCount := guessCount.(int) + 1
-		session.Set("guess_count", newGuessCount)
-		session.Save()
+		curSession.Set("guess_count", newGuessCount)
+		curSession.Save()
 
 		type verSummary struct {
 			Id          int    `json:"id"`
@@ -261,22 +225,21 @@ func SetupRouter() *gin.Engine {
 	})
 
 	router.GET("/check_final", func(c *gin.Context) {
-		// session
-		session := sessions.Default(c)
+		curSession := sessions.Default(c)
 		storeInterface, exists := c.Get("session_store")
 		if !exists {
 			c.JSON(500, gin.H{"error": "session store not initialized"})
 			return
 		}
-		store := storeInterface.(*SessionStore)
+		store := storeInterface.(*session.SessionStore)
 
 		// query params
-		puzzleId := session.Get("puzzle_id").(string)
+		puzzleId := curSession.Get("puzzle_id").(string)
 		if puzzleId == "" {
 			c.JSON(400, gin.H{"error": "no puzzle session found"})
 			return
 		}
-		guessCount, ok := session.Get("guess_count").(int)
+		guessCount, ok := curSession.Get("guess_count").(int)
 		if !ok {
 			guessCount = 0
 		}
@@ -292,15 +255,13 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// retrieve puzzle from server-side storage
-		puzzleWithExp, ok := store.ActivePuzzles[puzzleId]
-		defer delete(store.ActivePuzzles, puzzleId)
-		if !ok || puzzleWithExp.Expiration.Before(time.Now()) {
-			delete(store.ActivePuzzles, puzzleId)
+		puzzle, ok := store.GetPuzzle(puzzleId, time.Now())
+		defer store.DeletePuzzle(puzzleId)
+		if !ok {
 			c.JSON(400, gin.H{"error": "puzzle not found in store"})
 			return
 		}
 
-		puzzle := puzzleWithExp.Puzzle
 		success := proposedSolution.Display == puzzle.Sol.Display
 
 		// log results if user is logged in
@@ -332,5 +293,4 @@ func SetupRouter() *gin.Engine {
 		}
 	})
 
-	return router
 }

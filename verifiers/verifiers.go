@@ -149,7 +149,6 @@ func getNumFromColor(c color, sol Solution) int {
 		panic("invalid color")
 	}
 }
-
 func smallestColor(sol Solution) color {
 	blue := 0
 	yellow := 1

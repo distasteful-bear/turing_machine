@@ -43,12 +43,12 @@ func enterGuess() verifiers.Solution {
 
 func RunLocalSinglePlayer(p verifiers.Puzzle) {
 	utils.CallClear()
-	fmt.Println("Welcome to the Turing Machine Game.\n\n")
+	fmt.Print("Welcome to the Turing Machine Game.\n\n")
 
 	fmt.Println("A Solution has been generated. \nBelow are your verififers.")
 	fmt.Println("When you enter a guess, each verifier will return whether the test was successful.")
 	fmt.Println("Use this information to deduce the solution.")
-	fmt.Println("When you feel confident, you can end the guessing and check your work.\n\n")
+	fmt.Print("When you feel confident, you can end the guessing and check your work.\n\n")
 
 	checkAnswer := false
 
