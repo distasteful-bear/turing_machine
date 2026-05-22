@@ -17,6 +17,13 @@ type Authenticator struct {
 
 // New instantiates the *Authenticator.
 func New() (*Authenticator, error) {
+	if os.Getenv("AUTH0_DOMAIN") == "" ||
+		os.Getenv("AUTH0_CLIENT_ID") == "" ||
+		os.Getenv("AUTH0_CLIENT_SECRET") == "" ||
+		os.Getenv("AUTH0_CALLBACK_URL") == "" {
+		return nil, nil
+	}
+
 	provider, err := oidc.NewProvider(
 		context.Background(),
 		"https://"+os.Getenv("AUTH0_DOMAIN")+"/",

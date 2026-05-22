@@ -130,6 +130,17 @@
             <h2 class="text-[#6b8aa3] mt-7 mb-4 text-2xl font-bold">
                 Top 10 Players
             </h2>
+            <div
+                class="bg-[#f8f9fa] border border-[#e0e0e0] rounded-lg p-4 mb-4 text-[#666] text-sm leading-relaxed"
+            >
+                <p>
+                    <span class="font-bold text-[#333]"
+                        >How ranks are scored:</span
+                    >
+                    score = wins ÷ average guesses per game. More wins and fewer
+                    guesses improve your rank.
+                </p>
+            </div>
 
             {{ if .TopUsers }}
             <div class="space-y-3">
@@ -190,9 +201,9 @@
                         </div>
                         <div class="text-center">
                             <p class="font-bold text-[#6b8aa3]">
-                                {{ .WinRate }}
+                                {{ .AvgGuesses }}
                             </p>
-                            <p class="text-xs">Win Rate</p>
+                            <p class="text-xs">Avg Guesses</p>
                         </div>
                     </div>
                 </div>

@@ -16,6 +16,11 @@ func Handler(ctx *gin.Context) {
 	session.Clear()
 	session.Save()
 
+	if os.Getenv("AUTH0_DOMAIN") == "" || os.Getenv("AUTH0_CLIENT_ID") == "" {
+		ctx.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+
 	logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())

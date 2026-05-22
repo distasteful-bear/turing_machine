@@ -70,8 +70,11 @@ func SetupRouter() *gin.Engine {
 	// auth routes
 	auth, err := authenticator.New()
 	if err != nil {
-		fmt.Print("Error creating authenticator session.")
-		panic(err)
+		log.Printf("Auth0 is not available; falling back to local dev login: %v", err)
+		auth = nil
+	}
+	if auth == nil {
+		log.Println("Auth0 env vars are not fully configured; /login will use a local dev user.")
 	}
 	router.GET("/login", login.Handler(auth))
 	router.GET("/callback", callback.Handler(auth))
@@ -271,10 +274,9 @@ func setupPuzzleRoutes(router gin.IRoutes) {
 			err := db.RecordGameCompletion(c.Request.Context(), userId, success, guessCount)
 			if err != nil {
 				log.Printf("Error recording game completion: %v", err)
-				c.JSON(500, gin.H{"error": "failed to record game"})
-				return
+			} else {
+				recordedGame = true
 			}
-			recordedGame = true
 		}
 
 		// compute leaderboard rankings

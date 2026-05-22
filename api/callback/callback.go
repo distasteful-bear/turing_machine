@@ -12,6 +12,11 @@ import (
 // Handler for our callback.
 func Handler(auth *authenticator.Authenticator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if auth == nil {
+			ctx.Redirect(http.StatusTemporaryRedirect, "/login")
+			return
+		}
+
 		session := sessions.Default(ctx)
 		if oauthErr := ctx.Query("error"); oauthErr != "" {
 			log.Printf("auth callback returned error: %s: %s", oauthErr, ctx.Query("error_description"))

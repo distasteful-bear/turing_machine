@@ -14,6 +14,21 @@ import (
 // Handler for our login.
 func Handler(auth *authenticator.Authenticator) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if auth == nil {
+			session := sessions.Default(ctx)
+			session.Set("profile", map[string]interface{}{
+				"sub":      "local-dev-user",
+				"nickname": "Local Dev",
+				"picture":  "",
+			})
+			if err := session.Save(); err != nil {
+				ctx.String(http.StatusInternalServerError, err.Error())
+				return
+			}
+			ctx.Redirect(http.StatusTemporaryRedirect, "/user")
+			return
+		}
+
 		state, err := generateRandomState()
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, err.Error())
